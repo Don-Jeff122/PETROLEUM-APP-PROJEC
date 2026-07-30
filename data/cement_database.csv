@@ -1,0 +1,6 @@
+Class,Density_ppg,Yield_m3_per_sack,Max_Temperature_C,Recommended_Use
+Class A,15.6,0.035,80,Surface casing
+Class B,15.8,0.034,90,Surface casing
+Class C,16.2,0.033,100,Shallow wells
+Class G,15.8,0.036,150,Production casing
+Class H,16.4,0.034,180,Deep wells
