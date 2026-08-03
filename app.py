@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import streamlit as st
 
 from views import plug_design
@@ -9,62 +11,141 @@ from views import (
     results,
     about,
 )
+from views.ui_style import inject_global_css
 
 st.set_page_config(
     page_title="PyMudCement-Optima",
     page_icon="🛢",
     layout="wide",
-    initial_sidebar_state="expanded"
+    initial_sidebar_state="expanded",
 )
 
-st.sidebar.image(
-    "assets/JEFFY-LOGO.png",
-    width=80
-)
+inject_global_css()
 
-st.sidebar.title("PyMudCement-Optima")
+# ── Sidebar ──────────────────────────────────────────────────────────────────
+with st.sidebar:
+    logo_col, name_col = st.columns([1, 2.2], vertical_alignment="center")
 
-st.sidebar.markdown("---")
+    with logo_col:
+        logo_path = Path("assets/JEFFY-LOGO.png")
+        if logo_path.exists():
+            st.image(str(logo_path), width=52)
+        else:
+            st.markdown('<div class="logo-fallback">🛢</div>', unsafe_allow_html=True)
 
-st.sidebar.title("Navigation")
+    with name_col:
+        st.markdown(
+            """
+            <div class="sidebar-brand">
+                <div class="app-name">PyMudCement-Optima</div>
+                <div class="app-tagline">Drilling &amp; Cementing Engineering</div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
 
-page = st.sidebar.radio(
-    "Select Module",
-    [
-        "Home",
-        "Mud Weight",
-        "Rheology",
-        "Hydraulics",
-        "Cement Design",
-        "Plug Design",
-        "Results",
-        "About",
-    ],
-)
+    st.markdown("---")
+    st.markdown('<div class="nav-section-label">Navigation</div>', unsafe_allow_html=True)
 
-if page == "Home":
-    st.title("🛢 PyMudCement-Optima")
-
-    st.subheader(
-        "Drilling Fluid and Cementing Engineering Software"
+    page = st.radio(
+        "Navigation",
+        [
+            "Home",
+            "Mud Weight",
+            "Rheology",
+            "Hydraulics",
+            "Cement Design",
+            "Plug Design",
+            "Results",
+            "About",
+        ],
+        label_visibility="collapsed",
     )
 
-    st.info(
+    st.markdown(
         """
-        This software assists drilling engineers in
+        <div class="sidebar-footer">
+            <div class="version">Version 1.0</div>
+            <div class="author">Donkor Jeffery</div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
 
-        • Mud Weight Design
-
-        • Rheology Analysis
-
-        • Hydraulics
-
-        • Cement Design
-
-        • Plug Design
-
-        Developed using Python and Streamlit.
+# ── Pages ────────────────────────────────────────────────────────────────────
+if page == "Home":
+    st.markdown(
         """
+        <div class="home-hero">
+            <h1>🛢 PyMudCement-Optima</h1>
+            <p class="hero-sub">
+                Integrated drilling fluid and cementing engineering platform
+                for mud weight design, rheology, hydraulics, and cement job planning.
+            </p>
+            <div class="hero-badges">
+                <span class="hero-badge">6 Engineering Modules</span>
+                <span class="hero-badge">PDF Report Export</span>
+                <span class="hero-badge">API Cement Database</span>
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        st.metric("Modules", "6", "Engineering tools")
+    with col2:
+        st.metric("Calculations", "5", "Core workflows")
+    with col3:
+        st.metric("Export", "PDF", "Engineering reports")
+
+    st.markdown(
+        """
+        <div class="feature-grid">
+            <div class="feature-card">
+                <div class="feature-icon">🛢</div>
+                <h3>Mud Weight Design</h3>
+                <p>Balance pore and fracture pressures with safe mud density windows.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🧪</div>
+                <h3>Rheology Analysis</h3>
+                <p>Bingham plastic model from viscometer readings with flow curves.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🌊</div>
+                <h3>Hydraulics</h3>
+                <p>Annular velocity and hole cleaning evaluation for optimal flow rates.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🏗</div>
+                <h3>Cement Design</h3>
+                <p>Primary cement job sizing with API cement class database.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🛑</div>
+                <h3>Plug Design</h3>
+                <p>Cement plug volume and sack requirements with depth tracking.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">📊</div>
+                <h3>Results Dashboard</h3>
+                <p>Consolidated summary and PDF report export for all calculations.</p>
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    st.markdown(
+        """
+        <div class="home-callout">
+            <strong>Getting started:</strong> Select a module from the sidebar to begin.
+            Results are saved automatically and can be exported from the Results page.
+        </div>
+        """,
+        unsafe_allow_html=True,
     )
 
 elif page == "Mud Weight":
@@ -87,11 +168,3 @@ elif page == "Results":
 
 elif page == "About":
     about.show()
-
-st.sidebar.markdown("---")
-
-st.sidebar.caption("Version 1.0")
-
-st.sidebar.caption("Developed by")
-
-st.sidebar.caption("Donkor Jeffery")
