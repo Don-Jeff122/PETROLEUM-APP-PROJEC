@@ -1,58 +1,29 @@
-GRAVITY = 9.81
+from modules.constants import GRAVITY
 
 
 def calculate_mud_density(pore_pressure, tvd):
-    """
-    Calculate the mud density required to balance formation pressure.
-
-    Parameters:
-        pore_pressure (Pa)
-        tvd (m)
-
-    Returns:
-        Mud density (kg/m³)
-    """
-
+    # mud density to balance formation pressure
     return pore_pressure / (GRAVITY * tvd)
 
 
 def calculate_hydrostatic_pressure(mud_density, tvd):
-    """
-    Calculate hydrostatic pressure.
-
-    Parameters:
-        mud_density (kg/m³)
-        tvd (m)
-
-    Returns:
-        Pressure (Pa)
-    """
-
+    # hydrostatic pressure from mud column
     return mud_density * GRAVITY * tvd
 
 
 def safe_window(pore_pressure, fracture_pressure, tvd):
-    """
-    Calculate the minimum and maximum safe mud density.
-    """
-
+    # calculate min and max safe mud density
     minimum_density = pore_pressure / (GRAVITY * tvd)
     maximum_density = fracture_pressure / (GRAVITY * tvd)
-
     return minimum_density, maximum_density
 
 
 def check_safe_density(density, minimum_density, maximum_density):
-    """
-    Check whether the mud density is safe.
-    """
-
+    # check if mud density is within safe window
     if density < minimum_density:
         return "TOO LOW"
-
     if density > maximum_density:
         return "TOO HIGH"
-
     return "SAFE"
 
 
@@ -71,7 +42,3 @@ def validate_inputs(pore_pressure, fracture_pressure, tvd):
         return False, "True Vertical Depth must be greater than zero."
 
     return True, ""
-
-
-def pa_to_mpa(value):
-    return value / 1_000_000

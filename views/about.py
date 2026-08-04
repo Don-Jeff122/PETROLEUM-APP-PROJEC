@@ -1,5 +1,6 @@
 import streamlit as st
 
+from modules.constants import APP_NAME, APP_VERSION, AUTHOR, UNIVERSITY, DEPARTMENT
 from views.ui_style import page_header, section_title
 
 
@@ -17,12 +18,13 @@ def show():
         with st.container(border=True):
             section_title("Overview", "About the Application")
             st.markdown(
-                """
-                **PyMudCement-Optima** is a drilling engineering application
-                developed to assist engineers in mud design, rheology analysis,
-                hydraulics calculations, cementing design, and plug design.
+                f"""
+                **{APP_NAME}** is a drilling engineering application
+                built to help engineers with mud design, rheology analysis,
+                hydraulics calculations, cementing design, plug design, and
+                plug &amp; abandonment operations.
 
-                The software was developed as a final year project using
+                This was developed as a final year project using
                 **Python** and **Streamlit**.
                 """
             )
@@ -33,9 +35,11 @@ def show():
             with tech_col1:
                 st.markdown("- **Python**")
                 st.markdown("- **Streamlit**")
-            with tech_col2:
                 st.markdown("- **Pandas**")
+            with tech_col2:
                 st.markdown("- **Plotly**")
+                st.markdown("- **NumPy**")
+                st.markdown("- **ReportLab**")
 
     with col2:
         with st.container(border=True):
@@ -73,13 +77,13 @@ def show():
             )
 
         st.markdown(
-            """
+            f"""
             <div class="dev-card">
                 <div class="dev-label">Developer</div>
-                <div class="dev-name">Donkor Jeffery</div>
+                <div class="dev-name">{AUTHOR}</div>
                 <div class="dev-detail">
-                    BSc Electrical and Electronic Engineering<br>
-                    University of Energy and Natural Resources (UENR)
+                    BSc {DEPARTMENT}<br>
+                    {UNIVERSITY}
                 </div>
             </div>
             """,
@@ -87,4 +91,4 @@ def show():
         )
 
     st.divider()
-    st.success("Version 1.0 — PyMudCement-Optima")
+    st.success(f"Version {APP_VERSION} — {APP_NAME}")

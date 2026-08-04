@@ -1,597 +1,423 @@
 import pandas as pd
 import streamlit as st
 
-# Brand palette — deep petroleum navy with gold accent
-COLORS = {
-    "primary": "#0A2540",
-    "secondary": "#1565A8",
-    "accent": "#C9A227",
-    "accent_light": "#E8C547",
-    "bg": "#EEF2F7",
-    "bg_subtle": "#F8FAFC",
-    "card": "#FFFFFF",
-    "text": "#0F172A",
-    "muted": "#64748B",
-    "border": "#E2E8F0",
-    "success": "#059669",
-    "warning": "#D97706",
-    "danger": "#DC2626",
-    "sidebar": "#071525",
-    "sidebar_mid": "#0F2744",
-}
-
-PLOTLY_LAYOUT = {
-    "template": "plotly_white",
-    "paper_bgcolor": "rgba(0,0,0,0)",
-    "plot_bgcolor": "rgba(0,0,0,0)",
-    "font": {"family": "Inter, Segoe UI, sans-serif", "color": COLORS["text"]},
-    "title": {"font": {"size": 16, "color": COLORS["primary"]}},
-    "height": 460,
-    "margin": {"l": 48, "r": 24, "t": 56, "b": 48},
-    "legend": {"orientation": "h", "yanchor": "bottom", "y": 1.02, "xanchor": "right", "x": 1},
-    "colorway": [COLORS["secondary"], COLORS["accent"], COLORS["success"], COLORS["danger"]],
-}
-
 
 def inject_global_css():
-    c = COLORS
     st.markdown(
-        f"""
+        """
         <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
-        :root {{
-            --pm-primary: {c["primary"]};
-            --pm-secondary: {c["secondary"]};
-            --pm-accent: {c["accent"]};
-            --pm-bg: {c["bg"]};
-            --pm-card: {c["card"]};
-            --pm-text: {c["text"]};
-            --pm-muted: {c["muted"]};
-            --pm-border: {c["border"]};
-        }}
-
-        html, body, [class*="css"] {{
+        html, body, [class*="css"] {
             font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
-        }}
+        }
 
-        /* ── App background ── */
-        .stApp {{
-            background:
-                radial-gradient(ellipse 80% 50% at 50% -10%, rgba(21,101,168,0.08) 0%, transparent 60%),
-                linear-gradient(180deg, {c["bg"]} 0%, #E4EAF2 100%);
-        }}
+        /* app background */
+        .stApp {
+            background: #EEF2F7;
+        }
 
-        .block-container {{
+        .block-container {
             padding-top: 1.25rem;
             padding-bottom: 2.5rem;
             max-width: 1180px;
-        }}
+        }
 
-        /* ── Sidebar ── */
-        [data-testid="stSidebar"] {{
-            background: linear-gradient(175deg, {c["sidebar"]} 0%, {c["sidebar_mid"]} 55%, #132D4A 100%);
-            border-right: 1px solid rgba(255,255,255,0.06);
-        }}
-        [data-testid="stSidebar"] > div:first-child {{
+        /* sidebar */
+        [data-testid="stSidebar"] {
+            background: #071525;
+        }
+        [data-testid="stSidebar"] > div:first-child {
             padding-top: 1.25rem;
-        }}
-        [data-testid="stSidebar"] * {{
+        }
+        [data-testid="stSidebar"] * {
             color: #CBD5E1;
-        }}
-        [data-testid="stSidebar"] .nav-section-label {{
+        }
+        [data-testid="stSidebar"] .nav-section-label {
             font-size: 0.62rem;
             font-weight: 700;
             letter-spacing: 0.14em;
             text-transform: uppercase;
             color: #64748B !important;
             margin: 0.5rem 0 0.65rem 0.15rem;
-        }}
-        [data-testid="stSidebar"] .stRadio label {{
-            background: rgba(255,255,255,0.04);
-            border: 1px solid rgba(255,255,255,0.07);
-            border-radius: 10px;
+        }
+        [data-testid="stSidebar"] .stRadio label {
             padding: 0.5rem 0.85rem;
             margin-bottom: 3px;
-            transition: all 0.18s ease;
-            cursor: pointer;
             font-size: 0.84rem !important;
             font-weight: 500 !important;
-        }}
-        [data-testid="stSidebar"] .stRadio label:hover {{
-            background: rgba(255,255,255,0.1);
-            border-color: rgba(201,162,39,0.45);
-            transform: translateX(2px);
-        }}
-        [data-testid="stSidebar"] .stRadio label:has(input:checked) {{
-            background: linear-gradient(135deg, rgba(21,101,168,0.35), rgba(201,162,39,0.18));
-            border-color: {c["accent"]};
+        }
+        [data-testid="stSidebar"] .stRadio label:has(input:checked) {
             color: #FFFFFF !important;
             font-weight: 600 !important;
-            box-shadow: 0 2px 12px rgba(201,162,39,0.15);
-        }}
-        [data-testid="stSidebar"] .stRadio div[role="radiogroup"] {{
-            gap: 3px;
-        }}
-        [data-testid="stSidebar"] hr {{
+        }
+        [data-testid="stSidebar"] hr {
             border: none;
             border-top: 1px solid rgba(255,255,255,0.08);
             margin: 0.75rem 0;
-        }}
-        .sidebar-brand .app-name {{
+        }
+        .sidebar-brand .app-name {
             font-size: 0.92rem;
             font-weight: 800;
             color: #FFFFFF !important;
-            letter-spacing: -0.02em;
             line-height: 1.2;
-        }}
-        .sidebar-brand .app-tagline {{
+        }
+        .sidebar-brand .app-tagline {
             font-size: 0.64rem;
             color: #64748B !important;
             margin-top: 0.2rem;
             line-height: 1.35;
             font-weight: 500;
-        }}
-        .logo-fallback {{
+        }
+        .logo-fallback {
             width: 52px;
             height: 52px;
-            background: linear-gradient(135deg, {c["secondary"]}, {c["accent"]});
-            border-radius: 12px;
+            background: #1565A8;
+            border-radius: 10px;
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 1.5rem;
-            box-shadow: 0 4px 16px rgba(0,0,0,0.3);
-        }}
-        .sidebar-footer {{
+        }
+        .sidebar-footer {
             text-align: center;
             padding-top: 1rem;
             margin-top: 0.5rem;
             border-top: 1px solid rgba(255,255,255,0.08);
-        }}
-        .sidebar-footer .version {{
+        }
+        .sidebar-footer .version {
             font-size: 0.68rem;
             color: #475569 !important;
             font-weight: 600;
-            letter-spacing: 0.04em;
-        }}
-        .sidebar-footer .author {{
+        }
+        .sidebar-footer .author {
             font-size: 0.72rem;
             color: #64748B !important;
             margin-top: 0.2rem;
-        }}
+        }
 
-        /* ── Page hero ── */
-        .page-hero {{
-            background: linear-gradient(125deg, {c["primary"]} 0%, {c["secondary"]} 55%, #1a7fd4 100%);
-            border-radius: 18px;
+        /* page hero */
+        .page-hero {
+            background: #0A2540;
+            border-radius: 12px;
             padding: 2rem 2.5rem;
             margin-bottom: 1.5rem;
             color: white;
-            position: relative;
-            overflow: hidden;
-            box-shadow:
-                0 1px 0 rgba(255,255,255,0.1) inset,
-                0 12px 40px rgba(10,37,64,0.28);
-        }}
-        .page-hero::before {{
-            content: '';
-            position: absolute;
-            top: -40%;
-            right: -8%;
-            width: 280px;
-            height: 280px;
-            background: radial-gradient(circle, rgba(201,162,39,0.18) 0%, transparent 70%);
-            pointer-events: none;
-        }}
-        .page-hero::after {{
-            content: '';
-            position: absolute;
-            bottom: -30%;
-            left: 20%;
-            width: 200px;
-            height: 200px;
-            background: radial-gradient(circle, rgba(255,255,255,0.06) 0%, transparent 70%);
-            pointer-events: none;
-        }}
-        .page-hero h1 {{
+        }
+        .page-hero h1 {
             font-size: 1.8rem;
-            font-weight: 800;
+            font-weight: 700;
             margin: 0 0 0.35rem 0;
             color: white !important;
-            letter-spacing: -0.03em;
-            position: relative;
-            z-index: 1;
-        }}
-        .page-hero p {{
+        }
+        .page-hero p {
             font-size: 0.92rem;
-            opacity: 0.9;
+            opacity: 0.85;
             margin: 0;
             color: #CBD5E1 !important;
-            position: relative;
-            z-index: 1;
             max-width: 620px;
             line-height: 1.5;
-        }}
+        }
 
-        /* ── Home hero (larger) ── */
-        .home-hero {{
-            background: linear-gradient(125deg, {c["primary"]} 0%, {c["secondary"]} 50%, #1976D2 100%);
-            border-radius: 20px;
-            padding: 2.75rem 3rem;
-            margin-bottom: 1.75rem;
-            position: relative;
-            overflow: hidden;
-            box-shadow: 0 16px 48px rgba(10,37,64,0.3);
-        }}
-        .home-hero::before {{
-            content: '';
-            position: absolute;
-            inset: 0;
-            background:
-                radial-gradient(circle at 85% 20%, rgba(201,162,39,0.22) 0%, transparent 45%),
-                radial-gradient(circle at 10% 80%, rgba(255,255,255,0.05) 0%, transparent 40%);
-            pointer-events: none;
-        }}
-        .home-hero h1 {{
-            font-size: 2.1rem;
-            font-weight: 800;
+        /* home hero */
+        .home-hero {
+            background: #0A2540;
+            border-radius: 14px;
+            padding: 2.5rem 3rem;
+            margin-bottom: 1.5rem;
+        }
+        .home-hero h1 {
+            font-size: 2rem;
+            font-weight: 700;
             color: #FFFFFF !important;
             margin: 0 0 0.5rem 0;
-            letter-spacing: -0.03em;
-            position: relative;
-        }}
-        .home-hero .hero-sub {{
-            font-size: 1rem;
+        }
+        .home-hero .hero-sub {
+            font-size: 0.95rem;
             color: #94A3B8 !important;
-            margin: 0 0 1.25rem 0;
-            position: relative;
+            margin: 0 0 1rem 0;
             max-width: 540px;
-            line-height: 1.55;
-        }}
-        .home-hero .hero-badges {{
+            line-height: 1.5;
+        }
+        .home-hero .hero-badges {
             display: flex;
             gap: 0.5rem;
             flex-wrap: wrap;
-            position: relative;
-        }}
-        .hero-badge {{
+        }
+        .hero-badge {
             background: rgba(255,255,255,0.1);
             border: 1px solid rgba(255,255,255,0.15);
-            border-radius: 999px;
+            border-radius: 20px;
             padding: 0.3rem 0.85rem;
             font-size: 0.72rem;
             font-weight: 600;
             color: #E2E8F0;
-            letter-spacing: 0.02em;
-        }}
+        }
 
-        /* ── Section labels ── */
-        .section-label {{
+        /* section labels */
+        .section-label {
             font-size: 0.68rem;
             font-weight: 700;
             letter-spacing: 0.12em;
             text-transform: uppercase;
-            color: {c["accent"]};
+            color: #C9A227;
             margin-bottom: 0.2rem;
-        }}
-        .section-title {{
+        }
+        .section-title {
             font-size: 1.05rem;
             font-weight: 700;
-            color: {c["primary"]};
+            color: #0A2540;
             margin: 0 0 0.85rem 0;
-            letter-spacing: -0.01em;
-        }}
+        }
 
-        /* ── Bordered panels ── */
-        [data-testid="stVerticalBlockBorderWrapper"] {{
-            background: {c["card"]};
-            border: 1px solid {c["border"]} !important;
-            border-radius: 14px !important;
-            box-shadow: 0 2px 12px rgba(15,23,42,0.04);
+        /* bordered panels */
+        [data-testid="stVerticalBlockBorderWrapper"] {
+            background: #FFFFFF;
+            border: 1px solid #E2E8F0 !important;
+            border-radius: 10px !important;
+            box-shadow: 0 1px 4px rgba(15,23,42,0.04);
             padding: 0.25rem;
-            transition: box-shadow 0.2s ease;
-        }}
-        [data-testid="stVerticalBlockBorderWrapper"]:hover {{
-            box-shadow: 0 4px 20px rgba(15,23,42,0.07);
-        }}
+        }
 
-        /* ── Feature cards (home) ── */
-        .feature-grid {{
+        /* feature cards (home) */
+        .feature-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             gap: 1rem;
             margin: 1.25rem 0 0.5rem 0;
-        }}
-        @media (max-width: 900px) {{
-            .feature-grid {{ grid-template-columns: repeat(2, 1fr); }}
-        }}
-        @media (max-width: 560px) {{
-            .feature-grid {{ grid-template-columns: 1fr; }}
-        }}
-        .feature-card {{
-            background: {c["card"]};
-            border: 1px solid {c["border"]};
-            border-radius: 14px;
-            padding: 1.35rem 1.25rem;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.03);
-            transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
-            position: relative;
-            overflow: hidden;
-        }}
-        .feature-card::before {{
-            content: '';
-            position: absolute;
-            top: 0; left: 0; right: 0;
-            height: 3px;
-            background: linear-gradient(90deg, {c["secondary"]}, {c["accent"]});
-            opacity: 0;
-            transition: opacity 0.22s ease;
-        }}
-        .feature-card:hover {{
-            transform: translateY(-3px);
-            box-shadow: 0 12px 32px rgba(10,37,64,0.12);
-            border-color: {c["secondary"]};
-        }}
-        .feature-card:hover::before {{
-            opacity: 1;
-        }}
-        .feature-icon {{
-            width: 42px;
-            height: 42px;
-            background: linear-gradient(135deg, rgba(21,101,168,0.1), rgba(201,162,39,0.12));
+        }
+        @media (max-width: 900px) {
+            .feature-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+        @media (max-width: 560px) {
+            .feature-grid { grid-template-columns: 1fr; }
+        }
+        .feature-card {
+            background: #FFFFFF;
+            border: 1px solid #E2E8F0;
             border-radius: 10px;
+            padding: 1.25rem;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.03);
+        }
+        .feature-icon {
+            width: 40px;
+            height: 40px;
+            background: #EEF2F7;
+            border-radius: 8px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.3rem;
+            font-size: 1.2rem;
             margin-bottom: 0.75rem;
-        }}
-        .feature-card h3 {{
-            font-size: 0.92rem;
-            font-weight: 700;
-            color: {c["primary"]};
-            margin: 0 0 0.4rem 0;
-        }}
-        .feature-card p {{
+        }
+        .feature-card h3 {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #0A2540;
+            margin: 0 0 0.35rem 0;
+        }
+        .feature-card p {
             font-size: 0.78rem;
-            color: {c["muted"]};
+            color: #64748B;
             margin: 0;
             line-height: 1.5;
-        }}
+        }
 
-        /* ── Metrics ── */
-        [data-testid="stMetric"] {{
-            background: {c["card"]};
-            border: 1px solid {c["border"]};
-            border-radius: 12px;
-            padding: 0.85rem 1.1rem;
-            box-shadow: 0 1px 6px rgba(0,0,0,0.03);
-            transition: border-color 0.2s ease;
-        }}
-        [data-testid="stMetric"]:hover {{
-            border-color: {c["secondary"]};
-        }}
-        [data-testid="stMetricLabel"] {{
+        /* metrics */
+        [data-testid="stMetric"] {
+            background: #FFFFFF;
+            border: 1px solid #E2E8F0;
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+        }
+        [data-testid="stMetricLabel"] {
             font-size: 0.75rem !important;
-            color: {c["muted"]} !important;
+            color: #64748B !important;
             font-weight: 600 !important;
             text-transform: uppercase;
-            letter-spacing: 0.04em;
-        }}
-        [data-testid="stMetricValue"] {{
-            font-size: 1.4rem !important;
-            color: {c["primary"]} !important;
-            font-weight: 800 !important;
-            letter-spacing: -0.02em;
-        }}
-        [data-testid="stMetricDelta"] {{
-            font-size: 0.72rem !important;
-        }}
+        }
+        [data-testid="stMetricValue"] {
+            font-size: 1.3rem !important;
+            color: #0A2540 !important;
+            font-weight: 700 !important;
+        }
 
-        /* ── Inputs ── */
-        [data-testid="stNumberInput"] input,
-        [data-testid="stSelectbox"] div[data-baseweb="select"] {{
-            border-radius: 8px !important;
-        }}
+        /* inputs */
         [data-testid="stNumberInput"] label,
-        [data-testid="stSelectbox"] label {{
+        [data-testid="stSelectbox"] label {
             font-weight: 600 !important;
             font-size: 0.82rem !important;
-            color: {c["text"]} !important;
-        }}
+            color: #0F172A !important;
+        }
 
-        /* ── Buttons ── */
-        .stButton > button {{
-            background: linear-gradient(135deg, {c["primary"]}, {c["secondary"]}) !important;
+        /* buttons */
+        .stButton > button {
+            background: #0A2540 !important;
             color: white !important;
             border: none !important;
-            border-radius: 10px !important;
-            padding: 0.6rem 1.75rem !important;
-            font-weight: 700 !important;
-            font-size: 0.88rem !important;
-            letter-spacing: 0.02em !important;
-            box-shadow: 0 4px 16px rgba(10,37,64,0.28) !important;
-            transition: all 0.2s ease !important;
-        }}
-        .stButton > button:hover {{
-            box-shadow: 0 8px 24px rgba(10,37,64,0.38) !important;
-            transform: translateY(-1px);
-        }}
-        .stButton > button:active {{
-            transform: translateY(0);
-        }}
-        .stDownloadButton > button {{
-            background: linear-gradient(135deg, {c["success"]}, #047857) !important;
-            box-shadow: 0 4px 16px rgba(5,150,105,0.3) !important;
-        }}
+            border-radius: 8px !important;
+            padding: 0.55rem 1.5rem !important;
+            font-weight: 600 !important;
+            font-size: 0.85rem !important;
+        }
+        .stDownloadButton > button {
+            background: #059669 !important;
+        }
 
-        /* ── Alerts ── */
-        [data-testid="stAlert"] {{
-            border-radius: 10px !important;
+        /* alerts */
+        [data-testid="stAlert"] {
+            border-radius: 8px !important;
             border-left-width: 4px !important;
             font-size: 0.88rem;
-        }}
+        }
 
-        /* ── Dividers ── */
-        hr {{
+        /* dividers */
+        hr {
             border: none;
-            border-top: 1px solid {c["border"]};
+            border-top: 1px solid #E2E8F0;
             margin: 1.5rem 0;
-        }}
+        }
 
-        /* ── Data tables ── */
-        [data-testid="stDataFrame"] {{
-            border: 1px solid {c["border"]};
-            border-radius: 12px;
+        /* data tables */
+        [data-testid="stDataFrame"] {
+            border: 1px solid #E2E8F0;
+            border-radius: 8px;
             overflow: hidden;
-            box-shadow: 0 1px 4px rgba(0,0,0,0.03);
-        }}
+        }
 
-        /* ── Progress bar (results) ── */
-        .progress-card {{
-            background: {c["card"]};
-            border: 1px solid {c["border"]};
-            border-radius: 14px;
+        /* progress bar */
+        .progress-card {
+            background: #FFFFFF;
+            border: 1px solid #E2E8F0;
+            border-radius: 10px;
             padding: 1.25rem 1.5rem;
             margin-bottom: 1.25rem;
-            box-shadow: 0 2px 12px rgba(15,23,42,0.04);
-        }}
-        .progress-header {{
+        }
+        .progress-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 0.75rem;
-        }}
-        .progress-header span {{
+        }
+        .progress-header span {
             font-size: 0.78rem;
             font-weight: 700;
             text-transform: uppercase;
-            letter-spacing: 0.08em;
-            color: {c["muted"]};
-        }}
-        .progress-header strong {{
+            color: #64748B;
+        }
+        .progress-header strong {
             font-size: 1.1rem;
-            font-weight: 800;
-            color: {c["primary"]};
-        }}
-        .progress-track {{
+            font-weight: 700;
+            color: #0A2540;
+        }
+        .progress-track {
             height: 8px;
-            background: {c["border"]};
+            background: #E2E8F0;
             border-radius: 999px;
             overflow: hidden;
-        }}
-        .progress-fill {{
+        }
+        .progress-fill {
             height: 100%;
-            border-radius: 999px;
-            background: linear-gradient(90deg, {c["secondary"]}, {c["accent"]});
+            background: #1565A8;
             transition: width 0.6s ease;
-        }}
-        .module-chips {{
+        }
+        .module-chips {
             display: flex;
             gap: 0.4rem;
             flex-wrap: wrap;
             margin-top: 0.75rem;
-        }}
-        .module-chip {{
+        }
+        .module-chip {
             font-size: 0.68rem;
             font-weight: 600;
             padding: 0.25rem 0.6rem;
             border-radius: 999px;
-            letter-spacing: 0.02em;
-        }}
-        .module-chip.done {{
-            background: rgba(5,150,105,0.12);
-            color: {c["success"]};
-            border: 1px solid rgba(5,150,105,0.25);
-        }}
-        .module-chip.pending {{
-            background: rgba(100,116,139,0.08);
-            color: {c["muted"]};
-            border: 1px solid {c["border"]};
-        }}
+        }
+        .module-chip.done {
+            background: rgba(5,150,105,0.1);
+            color: #059669;
+        }
+        .module-chip.pending {
+            background: #F1F5F9;
+            color: #64748B;
+        }
 
-        /* ── About page ── */
-        .module-list {{
+        /* about page */
+        .module-list {
             display: flex;
             flex-direction: column;
             gap: 0.5rem;
-        }}
-        .module-item {{
+        }
+        .module-item {
             display: flex;
             align-items: center;
             gap: 0.75rem;
-            padding: 0.65rem 0.85rem;
-            background: {c["bg_subtle"]};
-            border: 1px solid {c["border"]};
-            border-radius: 10px;
-            transition: background 0.18s ease;
-        }}
-        .module-item:hover {{
-            background: rgba(21,101,168,0.06);
-            border-color: {c["secondary"]};
-        }}
-        .module-item .mi-icon {{
+            padding: 0.6rem 0.85rem;
+            background: #F8FAFC;
+            border: 1px solid #E2E8F0;
+            border-radius: 8px;
+        }
+        .module-item .mi-icon {
             width: 32px;
             height: 32px;
-            background: linear-gradient(135deg, rgba(21,101,168,0.12), rgba(201,162,39,0.1));
+            background: #EEF2F7;
             border-radius: 8px;
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 1rem;
             flex-shrink: 0;
-        }}
-        .module-item .mi-name {{
+        }
+        .module-item .mi-name {
             font-size: 0.85rem;
             font-weight: 600;
-            color: {c["primary"]};
-        }}
-        .dev-card {{
-            background: linear-gradient(135deg, {c["primary"]}, {c["secondary"]});
-            border-radius: 14px;
+            color: #0A2540;
+        }
+        .dev-card {
+            background: #0A2540;
+            border-radius: 10px;
             padding: 1.25rem 1.5rem;
             color: white;
             margin-top: 0.5rem;
-        }}
-        .dev-card .dev-label {{
+        }
+        .dev-card .dev-label {
             font-size: 0.65rem;
             font-weight: 700;
             letter-spacing: 0.1em;
             text-transform: uppercase;
-            color: {c["accent_light"]};
+            color: #C9A227;
             margin-bottom: 0.5rem;
-        }}
-        .dev-card .dev-name {{
+        }
+        .dev-card .dev-name {
             font-size: 1.1rem;
-            font-weight: 800;
+            font-weight: 700;
             margin-bottom: 0.35rem;
-        }}
-        .dev-card .dev-detail {{
+        }
+        .dev-card .dev-detail {
             font-size: 0.78rem;
             color: #94A3B8;
             line-height: 1.5;
-        }}
+        }
 
-        /* ── Info callout (home) ── */
-        .home-callout {{
-            background: linear-gradient(135deg, rgba(21,101,168,0.06), rgba(201,162,39,0.05));
-            border: 1px solid rgba(21,101,168,0.15);
-            border-left: 4px solid {c["accent"]};
-            border-radius: 12px;
+        /* home callout */
+        .home-callout {
+            background: #F8FAFC;
+            border: 1px solid #E2E8F0;
+            border-left: 4px solid #C9A227;
+            border-radius: 8px;
             padding: 1rem 1.25rem;
             margin-top: 0.5rem;
             font-size: 0.88rem;
-            color: {c["text"]};
-            line-height: 1.55;
-        }}
+            color: #0F172A;
+            line-height: 1.5;
+        }
 
-        /* ── Hide Streamlit chrome ── */
-        #MainMenu {{visibility: hidden;}}
-        footer {{visibility: hidden;}}
-        header[data-testid="stHeader"] {{
+        /* hide streamlit chrome */
+        #MainMenu {visibility: hidden;}
+        footer {visibility: hidden;}
+        header[data-testid="stHeader"] {
             background: transparent;
-        }}
+        }
         </style>
         """,
         unsafe_allow_html=True,
@@ -619,7 +445,7 @@ def section_title(label: str, title: str):
 
 
 def progress_overview(completed: int, total: int, modules: list):
-    """Render a styled progress bar with module status chips."""
+    """render progress bar with module status chips"""
     pct = int((completed / total) * 100) if total else 0
     chips_html = ""
     for name, done in modules:
@@ -646,23 +472,19 @@ def progress_overview(completed: int, total: int, modules: list):
 
 def results_table(parameters: list, values: list):
     df = pd.DataFrame({"Parameter": parameters, "Value": values})
-    st.dataframe(df, use_container_width=True, hide_index=True)
+    st.dataframe(df, width="stretch", hide_index=True)
 
 
 def apply_plotly_style(fig):
-    fig.update_layout(**PLOTLY_LAYOUT)
-    fig.update_xaxes(gridcolor=COLORS["border"], linecolor="#CBD5E1", zerolinecolor="#CBD5E1")
-    fig.update_yaxes(gridcolor=COLORS["border"], linecolor="#CBD5E1", zerolinecolor="#CBD5E1")
+    fig.update_layout(
+        template="plotly_white",
+        paper_bgcolor="rgba(0,0,0,0)",
+        plot_bgcolor="rgba(0,0,0,0)",
+        font={"family": "Inter, Segoe UI, sans-serif", "color": "#0F172A"},
+        title={"font": {"size": 16, "color": "#0A2540"}},
+        height=460,
+        margin={"l": 48, "r": 24, "t": 56, "b": 48},
+    )
+    fig.update_xaxes(gridcolor="#E2E8F0", linecolor="#CBD5E1")
+    fig.update_yaxes(gridcolor="#E2E8F0", linecolor="#CBD5E1")
     return fig
-
-
-def status_message(status: str, messages: dict):
-    msg = messages.get(status, "")
-    if not msg:
-        return
-    if status in ("SAFE", "GOOD"):
-        st.success(msg)
-    elif status in ("FAIR",):
-        st.warning(msg)
-    else:
-        st.error(msg)

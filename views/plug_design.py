@@ -3,7 +3,6 @@ import streamlit as st
 from modules.database import load_cement_database, get_cement_data
 from modules.plug import (
     calculate_plug_volume,
-    calculate_cement_sacks,
     validate_inputs,
 )
 from views.ui_style import page_header, section_title, results_table
@@ -51,7 +50,7 @@ def show():
             plug_length = st.number_input("Plug Length (m)", value=100.0)
             plug_top = st.number_input("Top of Plug (m)", value=1500.0)
 
-            calculate = st.button("Calculate Plug", use_container_width=True)
+            calculate = st.button("Calculate Plug", width="stretch")
 
     plug_bottom = plug_top + plug_length
 
@@ -77,7 +76,7 @@ def show():
             return
 
         volume = calculate_plug_volume(hole_diameter, plug_length)
-        sacks = calculate_cement_sacks(volume, yield_per_sack)
+        sacks = volume / yield_per_sack  # required cement sacks
 
         st.session_state["plug_results"] = {
             "Plug Volume": volume,

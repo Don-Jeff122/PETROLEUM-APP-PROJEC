@@ -2,19 +2,21 @@ from pathlib import Path
 
 import streamlit as st
 
-from views import plug_design
 from views import (
     mud_weight,
     rheology,
     hydraulics,
     cement_design,
+    plug_design,
+    abandonment,
     results,
     about,
 )
+from modules.constants import APP_NAME, APP_TAGLINE, APP_VERSION, AUTHOR
 from views.ui_style import inject_global_css
 
 st.set_page_config(
-    page_title="PyMudCement-Optima",
+    page_title=APP_NAME,
     page_icon="🛢",
     layout="wide",
     initial_sidebar_state="expanded",
@@ -35,10 +37,10 @@ with st.sidebar:
 
     with name_col:
         st.markdown(
-            """
+            f"""
             <div class="sidebar-brand">
-                <div class="app-name">PyMudCement-Optima</div>
-                <div class="app-tagline">Drilling &amp; Cementing Engineering</div>
+                <div class="app-name">{APP_NAME}</div>
+                <div class="app-tagline">{APP_TAGLINE}</div>
             </div>
             """,
             unsafe_allow_html=True,
@@ -56,6 +58,7 @@ with st.sidebar:
             "Hydraulics",
             "Cement Design",
             "Plug Design",
+            "Abandonment",
             "Results",
             "About",
         ],
@@ -63,10 +66,10 @@ with st.sidebar:
     )
 
     st.markdown(
-        """
+        f"""
         <div class="sidebar-footer">
-            <div class="version">Version 1.0</div>
-            <div class="author">Donkor Jeffery</div>
+            <div class="version">Version {APP_VERSION}</div>
+            <div class="author">{AUTHOR}</div>
         </div>
         """,
         unsafe_allow_html=True,
@@ -75,9 +78,9 @@ with st.sidebar:
 # ── Pages ────────────────────────────────────────────────────────────────────
 if page == "Home":
     st.markdown(
-        """
+        f"""
         <div class="home-hero">
-            <h1>🛢 PyMudCement-Optima</h1>
+            <h1>🛢 {APP_NAME}</h1>
             <p class="hero-sub">
                 Integrated drilling fluid and cementing engineering platform
                 for mud weight design, rheology, hydraulics, and cement job planning.
@@ -86,6 +89,7 @@ if page == "Home":
                 <span class="hero-badge">6 Engineering Modules</span>
                 <span class="hero-badge">PDF Report Export</span>
                 <span class="hero-badge">API Cement Database</span>
+                <span class="hero-badge">Job Procedure Sheets</span>
             </div>
         </div>
         """,
@@ -96,9 +100,9 @@ if page == "Home":
     with col1:
         st.metric("Modules", "6", "Engineering tools")
     with col2:
-        st.metric("Calculations", "5", "Core workflows")
+        st.metric("Calculations", "6", "Core workflows")
     with col3:
-        st.metric("Export", "PDF", "Engineering reports")
+        st.metric("Export", "PDF", "Reports & procedures")
 
     st.markdown(
         """
@@ -116,12 +120,12 @@ if page == "Home":
             <div class="feature-card">
                 <div class="feature-icon">🌊</div>
                 <h3>Hydraulics</h3>
-                <p>Annular velocity and hole cleaning evaluation for optimal flow rates.</p>
+                <p>Annular velocity, pressure drops, ECD and hole cleaning evaluation.</p>
             </div>
             <div class="feature-card">
                 <div class="feature-icon">🏗</div>
                 <h3>Cement Design</h3>
-                <p>Primary cement job sizing with API cement class database.</p>
+                <p>Primary cement job sizing with API database, additives and temperature checks.</p>
             </div>
             <div class="feature-card">
                 <div class="feature-icon">🛑</div>
@@ -129,9 +133,14 @@ if page == "Home":
                 <p>Cement plug volume and sack requirements with depth tracking.</p>
             </div>
             <div class="feature-card">
+                <div class="feature-icon">♻️</div>
+                <h3>Plug &amp; Abandonment</h3>
+                <p>Abandonment plugs, squeeze cement volumes and balanced plug design.</p>
+            </div>
+            <div class="feature-card">
                 <div class="feature-icon">📊</div>
                 <h3>Results Dashboard</h3>
-                <p>Consolidated summary and PDF report export for all calculations.</p>
+                <p>Consolidated summary, PDF report export and cementing job procedure sheets.</p>
             </div>
         </div>
         """,
@@ -162,6 +171,9 @@ elif page == "Cement Design":
 
 elif page == "Plug Design":
     plug_design.show()
+
+elif page == "Abandonment":
+    abandonment.show()
 
 elif page == "Results":
     results.show()

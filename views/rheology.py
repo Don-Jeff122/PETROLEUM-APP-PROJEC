@@ -24,7 +24,7 @@ def show():
             reading_600 = st.number_input("600 RPM Reading", value=60.0)
             reading_300 = st.number_input("300 RPM Reading", value=40.0)
 
-            calculate = st.button("Calculate Rheology", use_container_width=True)
+            calculate = st.button("Calculate Rheology", width="stretch")
 
     with info_col:
         with st.container(border=True):
@@ -79,7 +79,7 @@ def show():
             xaxis_title="Shear Rate (s⁻¹)",
             yaxis_title="Shear Stress (Pa)",
         )
-        st.plotly_chart(apply_plotly_style(fig), use_container_width=True)
+        st.plotly_chart(apply_plotly_style(fig), width="stretch")
 
         section_title("Results", "Rheology Summary")
 

@@ -9,9 +9,12 @@ from modules.mud import (
     safe_window,
     check_safe_density,
     validate_inputs,
-    pa_to_mpa,
 )
+from modules.constants import GRAVITY, PA_PER_MPA
 from views.ui_style import page_header, section_title, results_table, apply_plotly_style
+
+# simple unit conversion
+pa_to_mpa = lambda x: x / PA_PER_MPA
 
 
 def show():
@@ -59,7 +62,7 @@ def show():
                 value=2500.0,
             )
 
-            calculate = st.button("Calculate Mud Weight", use_container_width=True)
+            calculate = st.button("Calculate Mud Weight", width="stretch")
 
     with info_col:
         with st.container(border=True):
@@ -109,9 +112,9 @@ def show():
         section_title("Analysis", "Pressure Profile")
 
         depth = np.linspace(0, tvd, 100)
-        mud_pressure = (mud_density * 9.81 * depth) / 1_000_000
-        minimum_pressure = (minimum_density * 9.81 * depth) / 1_000_000
-        maximum_pressure = (maximum_density * 9.81 * depth) / 1_000_000
+        mud_pressure = (mud_density * GRAVITY * depth) / PA_PER_MPA
+        minimum_pressure = (minimum_density * GRAVITY * depth) / PA_PER_MPA
+        maximum_pressure = (maximum_density * GRAVITY * depth) / PA_PER_MPA
 
         pressure_data = pd.DataFrame({
             "Depth": depth,
@@ -127,7 +130,7 @@ def show():
             title="Pressure vs Depth",
         )
         fig.update_layout(yaxis_title="Pressure (MPa)", xaxis_title="Depth (m)")
-        st.plotly_chart(apply_plotly_style(fig), use_container_width=True)
+        st.plotly_chart(apply_plotly_style(fig), width="stretch")
 
         section_title("Results", "Mud Weight Summary")
 

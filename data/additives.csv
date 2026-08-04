@@ -1,0 +1,9 @@
+Additive_Name,Category,Dosage_kg_per_sack,Effect,Max_Temperature_C
+CEMENT,H Accelerator,0.5,Increases early strength,80
+CEMRET,Retarder,1.0,Extends thickening time,200
+CEMDIS,Dispersant,0.5,Reduces viscosity,180
+CEMFLUID,Fluid Loss Agent,2.0,Controls fluid loss,160
+CEMWEIGHT,Weight Agent,5.0,Increases density,200
+CEMANTIFOAM,Antifoam,0.1,Reduces air entrainment,150
+CEMTHERM,Thermal Stabilizer,1.5,Stabilizes at high temp,220
+CEMFLEX,Flexibility Agent,0.8,Improves flexibility,140

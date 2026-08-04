@@ -1,22 +1,10 @@
 def calculate_pv(reading_600, reading_300):
-    """
-    Calculate Plastic Viscosity (PV)
-
-    Formula:
-    PV = 600 rpm reading - 300 rpm reading
-    """
-
+    # PV = R600 - R300 (Bingham plastic model)
     return reading_600 - reading_300
 
 
 def calculate_yp(reading_300, pv):
-    """
-    Calculate Yield Point (YP)
-
-    Formula:
-    YP = 300 rpm reading - PV
-    """
-
+    # YP = R300 - PV
     return reading_300 - pv
 
 
