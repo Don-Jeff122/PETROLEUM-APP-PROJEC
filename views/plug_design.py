@@ -5,13 +5,19 @@ from modules.plug import (
     calculate_plug_volume,
     validate_inputs,
 )
-from views.ui_style import page_header, section_title, results_table
+from views.ui_style import (
+    page_header,
+    section_title,
+    results_table,
+    begin_calculation,
+    calculated_button,
+)
 
 
 def show():
 
     page_header(
-        "🛑",
+        "block",
         "Plug Design",
         "Calculate cement plug volume, sack requirements, and depth placement.",
     )
@@ -50,7 +56,9 @@ def show():
             plug_length = st.number_input("Plug Length (m)", value=100.0)
             plug_top = st.number_input("Top of Plug (m)", value=1500.0)
 
-            calculate = st.button("Calculate Plug", width="stretch")
+            calculate = calculated_button(
+                "Calculate Plug", "plug_results", "calculate_plug"
+            )
 
     plug_bottom = plug_top + plug_length
 
@@ -62,6 +70,7 @@ def show():
             st.metric("Plug Length", f"{plug_length:.0f} m")
 
     if calculate:
+        begin_calculation("Calculating Plug…")
 
         yield_per_sack = cement["Yield_m3_per_sack"]
 

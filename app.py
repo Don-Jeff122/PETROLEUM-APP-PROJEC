@@ -1,3 +1,4 @@
+import mimetypes
 from pathlib import Path
 
 import streamlit as st
@@ -13,11 +14,14 @@ from views import (
     about,
 )
 from modules.constants import APP_NAME, APP_TAGLINE, APP_VERSION, AUTHOR
-from views.ui_style import inject_global_css
+from views.ui_style import inject_global_css, close_sidebar
+
+# Serve .woff2 fonts with the correct content type (Windows mimetypes lacks it)
+mimetypes.add_type("font/woff2", ".woff2")
 
 st.set_page_config(
     page_title=APP_NAME,
-    page_icon="🛢",
+    page_icon=":material/oil_barrel:",
     layout="wide",
     initial_sidebar_state="expanded",
 )
@@ -33,7 +37,10 @@ with st.sidebar:
         if logo_path.exists():
             st.image(str(logo_path), width=52)
         else:
-            st.markdown('<div class="logo-fallback">🛢</div>', unsafe_allow_html=True)
+            st.markdown(
+                '<div class="logo-fallback"><span class="material-symbols-outlined">oil_barrel</span></div>',
+                unsafe_allow_html=True,
+            )
 
     with name_col:
         st.markdown(
@@ -75,12 +82,20 @@ with st.sidebar:
         unsafe_allow_html=True,
     )
 
+# Auto-collapse the sidebar after navigating to a module
+if (
+    st.session_state.get("previous_page") is not None
+    and st.session_state["previous_page"] != page
+):
+    close_sidebar()
+st.session_state["previous_page"] = page
+
 # ── Pages ────────────────────────────────────────────────────────────────────
 if page == "Home":
     st.markdown(
         f"""
         <div class="home-hero">
-            <h1>🛢 {APP_NAME}</h1>
+            <h1><span class="material-symbols-outlined">oil_barrel</span> {APP_NAME}</h1>
             <p class="hero-sub">
                 Integrated drilling fluid and cementing engineering platform
                 for mud weight design, rheology, hydraulics, and cement job planning.
@@ -108,37 +123,37 @@ if page == "Home":
         """
         <div class="feature-grid">
             <div class="feature-card">
-                <div class="feature-icon">🛢</div>
+                <div class="feature-icon"><span class="material-symbols-outlined">oil_barrel</span></div>
                 <h3>Mud Weight Design</h3>
                 <p>Balance pore and fracture pressures with safe mud density windows.</p>
             </div>
             <div class="feature-card">
-                <div class="feature-icon">🧪</div>
+                <div class="feature-icon"><span class="material-symbols-outlined">science</span></div>
                 <h3>Rheology Analysis</h3>
                 <p>Bingham plastic model from viscometer readings with flow curves.</p>
             </div>
             <div class="feature-card">
-                <div class="feature-icon">🌊</div>
+                <div class="feature-icon"><span class="material-symbols-outlined">waves</span></div>
                 <h3>Hydraulics</h3>
                 <p>Annular velocity, pressure drops, ECD and hole cleaning evaluation.</p>
             </div>
             <div class="feature-card">
-                <div class="feature-icon">🏗</div>
+                <div class="feature-icon"><span class="material-symbols-outlined">construction</span></div>
                 <h3>Cement Design</h3>
                 <p>Primary cement job sizing with API database, additives and temperature checks.</p>
             </div>
             <div class="feature-card">
-                <div class="feature-icon">🛑</div>
+                <div class="feature-icon"><span class="material-symbols-outlined">block</span></div>
                 <h3>Plug Design</h3>
                 <p>Cement plug volume and sack requirements with depth tracking.</p>
             </div>
             <div class="feature-card">
-                <div class="feature-icon">♻️</div>
+                <div class="feature-icon"><span class="material-symbols-outlined">recycling</span></div>
                 <h3>Plug &amp; Abandonment</h3>
                 <p>Abandonment plugs, squeeze cement volumes and balanced plug design.</p>
             </div>
             <div class="feature-card">
-                <div class="feature-icon">📊</div>
+                <div class="feature-icon"><span class="material-symbols-outlined">monitoring</span></div>
                 <h3>Results Dashboard</h3>
                 <p>Consolidated summary, PDF report export and cementing job procedure sheets.</p>
             </div>

@@ -11,7 +11,14 @@ from modules.mud import (
     validate_inputs,
 )
 from modules.constants import GRAVITY, PA_PER_MPA
-from views.ui_style import page_header, section_title, results_table, apply_plotly_style
+from views.ui_style import (
+    page_header,
+    section_title,
+    results_table,
+    apply_plotly_style,
+    begin_calculation,
+    calculated_button,
+)
 
 # simple unit conversion
 pa_to_mpa = lambda x: x / PA_PER_MPA
@@ -20,7 +27,7 @@ pa_to_mpa = lambda x: x / PA_PER_MPA
 def show():
 
     page_header(
-        "🛢",
+        "oil_barrel",
         "Mud Weight Design",
         "Calculate required mud density and verify the safe operating window.",
     )
@@ -62,7 +69,9 @@ def show():
                 value=2500.0,
             )
 
-            calculate = st.button("Calculate Mud Weight", width="stretch")
+            calculate = calculated_button(
+                "Calculate Mud Weight", "mud_results", "calculate_mud_weight"
+            )
 
     with info_col:
         with st.container(border=True):
@@ -82,6 +91,7 @@ def show():
             )
 
     if calculate:
+        begin_calculation("Calculating Mud Weight…")
 
         valid, message = validate_inputs(
             pore_pressure,

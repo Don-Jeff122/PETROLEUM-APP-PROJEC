@@ -7,7 +7,7 @@ from views.ui_style import page_header, section_title, progress_overview
 def show():
 
     page_header(
-        "📊",
+        "monitoring",
         "Results Dashboard",
         "Consolidated summary of all engineering calculations.",
     )

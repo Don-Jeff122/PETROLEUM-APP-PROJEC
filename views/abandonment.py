@@ -9,13 +9,19 @@ from modules.abandonment import (
     calculate_abandonment_sacks,
     validate_inputs,
 )
-from views.ui_style import page_header, section_title, results_table
+from views.ui_style import (
+    page_header,
+    section_title,
+    results_table,
+    begin_calculation,
+    calculated_button,
+)
 
 
 def show():
 
     page_header(
-        "♻️",
+        "recycling",
         "Plug & Abandonment",
         "Design abandonment cement plugs, squeeze volumes, and balanced plugs for P&A operations.",
     )
@@ -76,7 +82,9 @@ def show():
                 value=1200.0,
             )
 
-            calculate = st.button("Calculate Abandonment Design", width="stretch")
+            calculate = calculated_button(
+                "Calculate Abandonment Design", "abandonment_results", "calculate_abandonment"
+            )
 
     with info_col:
         with st.container(border=True):
@@ -98,6 +106,7 @@ def show():
     plug_bottom = plug_top + plug_length
 
     if calculate:
+        begin_calculation("Calculating Abandonment Design…")
 
         yield_per_sack = cement["Yield_m3_per_sack"]
 

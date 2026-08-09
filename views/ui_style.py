@@ -1,12 +1,52 @@
 import pandas as pd
 import streamlit as st
+import streamlit.components.v1 as components
 
 
 def inject_global_css():
     st.markdown(
         """
         <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        /* Fonts are served locally from the app's static/ folder so the UI
+           looks identical even when Google Fonts is unreachable. */
+        @font-face {
+            font-family: 'Inter';
+            font-style: normal;
+            font-weight: 400;
+            font-display: swap;
+            src: url('/app/static/Inter-400.woff2') format('woff2');
+        }
+        @font-face {
+            font-family: 'Inter';
+            font-style: normal;
+            font-weight: 500;
+            font-display: swap;
+            src: url('/app/static/Inter-500.woff2') format('woff2');
+        }
+        @font-face {
+            font-family: 'Inter';
+            font-style: normal;
+            font-weight: 600;
+            font-display: swap;
+            src: url('/app/static/Inter-600.woff2') format('woff2');
+        }
+        @font-face {
+            font-family: 'Inter';
+            font-style: normal;
+            font-weight: 700;
+            font-display: swap;
+            src: url('/app/static/Inter-700.woff2') format('woff2');
+        }
+
+        /* Material Symbols icon font — served locally so icons (ligatures)
+           render as glyphs instead of literal words. */
+        @font-face {
+            font-family: "Material Symbols Outlined";
+            font-style: normal;
+            font-weight: 100 700;
+            font-display: block;
+            src: url('/app/static/MaterialSymbolsOutlined.woff2') format('woff2');
+        }
 
         html, body, [class*="css"] {
             font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
@@ -26,6 +66,28 @@ def inject_global_css():
         /* sidebar */
         [data-testid="stSidebar"] {
             background: #071525;
+        }
+
+        /* sidebar expand toggle -> hamburger (three bars) */
+        [data-testid="stExpandSidebarButton"] svg,
+        [data-testid="stExpandSidebarButton"] span {
+            display: none !important;
+        }
+        [data-testid="stExpandSidebarButton"]::before {
+            content: "menu";
+            font-family: 'Material Symbols Outlined';
+            font-size: 24px;
+            font-feature-settings: 'liga';
+            line-height: 1;
+            display: inline-block;
+            color: #475569;
+            transition: color 0.2s ease, transform 0.15s ease;
+        }
+        [data-testid="stExpandSidebarButton"]:hover::before {
+            color: #0A2540;
+        }
+        [data-testid="stExpandSidebarButton"]:active::before {
+            transform: scale(0.9);
         }
         [data-testid="stSidebar"] > div:first-child {
             padding-top: 1.25rem;
@@ -77,7 +139,10 @@ def inject_global_css():
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.5rem;
+        }
+        .logo-fallback .material-symbols-outlined {
+            font-size: 28px;
+            color: #FFFFFF;
         }
         .sidebar-footer {
             text-align: center;
@@ -96,6 +161,25 @@ def inject_global_css():
             margin-top: 0.2rem;
         }
 
+        /* material symbols (icon font) */
+        .material-symbols-outlined {
+            font-family: 'Material Symbols Outlined';
+            font-weight: normal;
+            font-style: normal;
+            font-size: 24px;
+            line-height: 1;
+            letter-spacing: normal;
+            text-transform: none;
+            display: inline-block;
+            white-space: nowrap;
+            word-wrap: normal;
+            direction: ltr;
+            -webkit-font-feature-settings: 'liga';
+            font-feature-settings: 'liga';
+            -webkit-font-smoothing: antialiased;
+            vertical-align: middle;
+        }
+
         /* page hero */
         .page-hero {
             background: #0A2540;
@@ -109,6 +193,12 @@ def inject_global_css():
             font-weight: 700;
             margin: 0 0 0.35rem 0;
             color: white !important;
+        }
+        .page-hero h1 .material-symbols-outlined {
+            font-size: 1.75rem;
+            color: #C9A227;
+            vertical-align: -5px;
+            margin-right: 0.4rem;
         }
         .page-hero p {
             font-size: 0.92rem;
@@ -131,6 +221,12 @@ def inject_global_css():
             font-weight: 700;
             color: #FFFFFF !important;
             margin: 0 0 0.5rem 0;
+        }
+        .home-hero h1 .material-symbols-outlined {
+            font-size: 2rem;
+            color: #C9A227;
+            vertical-align: -6px;
+            margin-right: 0.4rem;
         }
         .home-hero .hero-sub {
             font-size: 0.95rem;
@@ -207,8 +303,11 @@ def inject_global_css():
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.2rem;
             margin-bottom: 0.75rem;
+        }
+        .feature-icon .material-symbols-outlined {
+            font-size: 22px;
+            color: #1565A8;
         }
         .feature-card h3 {
             font-size: 0.9rem;
@@ -259,9 +358,57 @@ def inject_global_css():
             padding: 0.55rem 1.5rem !important;
             font-weight: 600 !important;
             font-size: 0.85rem !important;
+            transition: background-color 0.2s ease, transform 0.1s ease, box-shadow 0.2s ease;
         }
+        .stButton > button:hover:not(:disabled) {
+            background: #1565A8 !important;
+            box-shadow: 0 2px 10px rgba(10, 37, 64, 0.25);
+        }
+        .stButton > button:active:not(:disabled) {
+            background: #1E4E7F !important;
+            transform: scale(0.97);
+        }
+        .stButton > button:focus {
+            background: #1565A8 !important;
+            box-shadow: 0 0 0 3px rgba(21, 101, 168, 0.35);
+        }
+        .stButton > button:focus-visible {
+            outline: 2px solid #C9A227;
+            outline-offset: 2px;
+        }
+
+        /* calculated buttons turn green to confirm the click worked */
+        .stButton button[kind="primary"],
+        .stButton button[data-testid="stBaseButton-primary"] {
+            background: #059669 !important;
+            color: white !important;
+        }
+        .stButton button[kind="primary"]:hover:not(:disabled),
+        .stButton button[data-testid="stBaseButton-primary"]:hover:not(:disabled) {
+            background: #047857 !important;
+            box-shadow: 0 2px 10px rgba(5, 150, 105, 0.35);
+        }
+        .stButton button[kind="primary"]:active:not(:disabled),
+        .stButton button[data-testid="stBaseButton-primary"]:active:not(:disabled) {
+            background: #065F46 !important;
+            transform: scale(0.97);
+        }
+        .stButton button[kind="primary"]:focus,
+        .stButton button[data-testid="stBaseButton-primary"]:focus {
+            background: #047857 !important;
+            box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.35);
+        }
+
         .stDownloadButton > button {
             background: #059669 !important;
+            transition: background-color 0.2s ease, transform 0.1s ease;
+        }
+        .stDownloadButton > button:hover:not(:disabled) {
+            background: #047857 !important;
+        }
+        .stDownloadButton > button:active:not(:disabled) {
+            background: #065F46 !important;
+            transform: scale(0.97);
         }
 
         /* alerts */
@@ -333,6 +480,11 @@ def inject_global_css():
             padding: 0.25rem 0.6rem;
             border-radius: 999px;
         }
+        .module-chip .chip-icon {
+            font-size: 0.8rem;
+            vertical-align: -2px;
+            margin-right: 2px;
+        }
         .module-chip.done {
             background: rgba(5,150,105,0.1);
             color: #059669;
@@ -365,8 +517,11 @@ def inject_global_css():
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1rem;
             flex-shrink: 0;
+        }
+        .module-item .mi-icon .material-symbols-outlined {
+            font-size: 19px;
+            color: #1565A8;
         }
         .module-item .mi-name {
             font-size: 0.85rem;
@@ -424,11 +579,19 @@ def inject_global_css():
     )
 
 
-def page_header(icon: str, title: str, subtitle: str):
+def icon(name: str, cls: str = ""):
+    """Return Material Symbols icon markup (font-based, no emoji).
+
+    ``name`` is the snake_case icon name, e.g. ``"oil_barrel"``.
+    """
+    return f'<span class="material-symbols-outlined {cls}">{name}</span>'
+
+
+def page_header(icon_name: str, title: str, subtitle: str):
     st.markdown(
         f"""
         <div class="page-hero">
-            <h1>{icon} {title}</h1>
+            <h1>{icon(icon_name)} {title}</h1>
             <p>{subtitle}</p>
         </div>
         """,
@@ -444,14 +607,141 @@ def section_title(label: str, title: str):
     )
 
 
+def _run_script(script: str):
+    """Embed a script inside a hidden same-origin iframe so it can drive the
+    parent app page (scrolling, closing the sidebar, etc.)."""
+    components.html(
+        f"""
+        <html><body style='margin:0;padding:0;overflow:hidden;'>
+        {script}
+        </body></html>
+        """,
+        height=1,
+        width=1,
+    )
+
+
+def results_anchor():
+    """Render an invisible anchor that the browser scrolls to after a
+    calculation button is clicked (results live below the input form).
+    Must be called before scroll_to_results()."""
+    st.markdown('<div id="results-anchor"></div>', unsafe_allow_html=True)
+
+
+def scroll_to_results():
+    """Smooth-scroll the page down to the results after a calculate click.
+
+    The script runs inside an iframe that Streamlit grants JavaScript
+    execution and same-origin access to the app, so it can reach the parent
+    document. It retries briefly to cover Streamlit's streaming render order.
+    """
+    _run_script(
+        """
+        <script>
+        (function () {
+            var doc = window.parent.document;
+            var tries = 0;
+            function findAndScroll() {
+                var el = doc.getElementById("results-anchor");
+                if (!el) return false;
+                el.scrollIntoView({ behavior: "smooth", block: "start" });
+                return true;
+            }
+            if (findAndScroll()) return;
+            var timer = setInterval(function () {
+                tries += 1;
+                if (findAndScroll() || tries > 25) clearInterval(timer);
+            }, 120);
+        })();
+        </script>
+        """
+    )
+
+
+def close_sidebar():
+    """Collapse the sidebar automatically after the user picks a page,
+    so the module content is fully visible.
+
+    Runs a script inside a same-origin iframe that clicks Streamlit's
+    native sidebar collapse button (stSidebarCollapseButton). Clicking
+    this button triggers Streamlit's own collapse state, which keeps
+    the expand/hamburger button (stExpandSidebarButton) visible.
+    """
+    _run_script(
+        """
+        <script>
+        (function () {
+            // Click the real <button> inside Streamlit's sidebar collapse
+            // wrapper. The wrapper div (stSidebarCollapseButton) has no
+            // handler of its own; only the inner button toggles the sidebar,
+            // which makes Streamlit show the hamburger expand button too.
+            function findAndClick() {
+                var doc = window.parent.document;
+                var wrapper = doc.querySelector('[data-testid="stSidebarCollapseButton"]');
+                if (wrapper) {
+                    var btn = wrapper.querySelector('button') || wrapper;
+                    btn.click();
+                    return true;
+                }
+                var selectors = [
+                    'button[data-testid="stSidebarCollapseButton"]',
+                    'button[data-testid="collapsedControl"]',
+                    'section[data-testid="stSidebar"] button:first-child'
+                ];
+                for (var i = 0; i < selectors.length; i++) {
+                    var btn = doc.querySelector(selectors[i]);
+                    if (btn) {
+                        btn.click();
+                        return true;
+                    }
+                }
+                return false;
+            }
+            if (findAndClick()) return;
+            // Retry a few times in case the sidebar is still rendering
+            var tries = 0;
+            var timer = setInterval(function () {
+                tries += 1;
+                if (findAndClick() || tries > 30) clearInterval(timer);
+            }, 100);
+        })();
+        </script>
+        """
+    )
+
+
+def calculated_button(default_label: str, state_key: str, key: str):
+    """Render a Calculate button that turns green and reads 'Calculated'
+    once results are stored in session state, so the user gets durable
+    confirmation that the calculation ran."""
+    done = state_key in st.session_state
+    return st.button(
+        "Calculated" if done else default_label,
+        width="stretch",
+        type="primary" if done else "secondary",
+        key=key,
+    )
+
+
+def begin_calculation(message: str):
+    """Give immediate feedback that a Calculate button was clicked: show a
+    toast and scroll the page down to the results rendered below the form.
+    Call this as the first statement of an ``if calculate:`` block."""
+    st.toast(message)
+    results_anchor()
+    scroll_to_results()
+
+
 def progress_overview(completed: int, total: int, modules: list):
     """render progress bar with module status chips"""
     pct = int((completed / total) * 100) if total else 0
     chips_html = ""
     for name, done in modules:
         cls = "done" if done else "pending"
-        icon = "✓" if done else "○"
-        chips_html += f'<span class="module-chip {cls}">{icon} {name}</span>'
+        mark = icon("check_circle", "chip-icon") if done else icon(
+            "radio_button_unchecked", "chip-icon"
+        )
+        chips_html += f'<span class="module-chip {cls}">{mark} {name}</span>'
 
     st.markdown(
         f"""

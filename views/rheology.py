@@ -4,13 +4,20 @@ import plotly.express as px
 import pandas as pd
 
 from modules.rheology import calculate_pv, calculate_yp, validate_inputs
-from views.ui_style import page_header, section_title, results_table, apply_plotly_style
+from views.ui_style import (
+    page_header,
+    section_title,
+    results_table,
+    apply_plotly_style,
+    begin_calculation,
+    calculated_button,
+)
 
 
 def show():
 
     page_header(
-        "🧪",
+        "science",
         "Mud Rheology",
         "Analyse viscometer readings using the Bingham plastic model.",
     )
@@ -24,7 +31,9 @@ def show():
             reading_600 = st.number_input("600 RPM Reading", value=60.0)
             reading_300 = st.number_input("300 RPM Reading", value=40.0)
 
-            calculate = st.button("Calculate Rheology", width="stretch")
+            calculate = calculated_button(
+                "Calculate Rheology", "rheology_results", "calculate_rheology"
+            )
 
     with info_col:
         with st.container(border=True):
@@ -43,6 +52,7 @@ def show():
             )
 
     if calculate:
+        begin_calculation("Calculating Rheology…")
 
         valid, message = validate_inputs(reading_600, reading_300)
 

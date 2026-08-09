@@ -10,13 +10,20 @@ from modules.hydraulics import (
     evaluate_hole_cleaning,
     validate_inputs,
 )
-from views.ui_style import page_header, section_title, results_table, apply_plotly_style
+from views.ui_style import (
+    page_header,
+    section_title,
+    results_table,
+    apply_plotly_style,
+    begin_calculation,
+    calculated_button,
+)
 
 
 def show():
 
     page_header(
-        "🌊",
+        "waves",
         "Hydraulics",
         "Evaluate annular velocity, hole cleaning, and ECD.",
     )
@@ -35,7 +42,9 @@ def show():
             pv = st.number_input("Plastic Viscosity (cP)", min_value=0.0, value=20.0)
             yp = st.number_input("Yield Point (lb/100ft²)", min_value=0.0, value=15.0)
 
-            calculate = st.button("Calculate Hydraulics", width="stretch")
+            calculate = calculated_button(
+                "Calculate Hydraulics", "hydraulics_results", "calculate_hydraulics"
+            )
 
     with info_col:
         with st.container(border=True):
@@ -55,6 +64,7 @@ def show():
             )
 
     if calculate:
+        begin_calculation("Calculating Hydraulics…")
 
         valid, message = validate_inputs(flow_rate, hole_diameter, pipe_od, tvd)
 

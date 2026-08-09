@@ -2,7 +2,12 @@ import pandas as pd
 import streamlit as st
 
 from modules.constants import EXCESS_WARNING_THRESHOLD, PPG_TO_KG_M3
-from modules.database import load_cement_database, get_cement_data, load_additives_database
+from modules.database import (
+    load_cement_database,
+    get_cement_data,
+    load_additives_database,
+    get_additive_data,
+)
 from modules.cement import (
     calculate_annular_volume,
     calculate_cement_volume,
@@ -13,13 +18,19 @@ from modules.cement import (
     evaluate_temperature_rating,
     validate_inputs,
 )
-from views.ui_style import page_header, section_title, results_table
+from views.ui_style import (
+    page_header,
+    section_title,
+    results_table,
+    begin_calculation,
+    calculated_button,
+)
 
 
 def show():
 
     page_header(
-        "🏗",
+        "construction",
         "Cement Design",
         "Size a primary cement job using the API cement class database.",
     )
@@ -98,7 +109,9 @@ def show():
                 value=300.0,
             )
 
-            calculate = st.button("Calculate Cement Design", width="stretch")
+            calculate = calculated_button(
+                "Calculate Cement Design", "cement_results", "calculate_cement"
+            )
 
         with st.container(border=True):
             section_title("Step 3", "Cement Additives")
@@ -126,6 +139,7 @@ def show():
             )
 
     if calculate:
+        begin_calculation("Calculating Cement Design…")
 
         yield_per_sack = cement["Yield_m3_per_sack"]
 
@@ -233,33 +247,33 @@ def show():
         # ── Warning logic (viva stress-test) ──
         if temp_rating == "EXCEEDED":
             st.error(
-                f"⚠️ Bottom-hole temperature ({bottom_hole_temp:.0f} °C) EXCEEDS the "
+                f"Bottom-hole temperature ({bottom_hole_temp:.0f} °C) EXCEEDS the "
                 f"{cement_class} rating of {cement['Max_Temperature_C']:.0f} °C by "
                 f"{-temp_margin:.0f} °C. Select a higher-rated cement class or "
                 "add a thermal stabilizer."
             )
         elif temp_rating == "LIMIT":
             st.warning(
-                f"⚠️ Bottom-hole temperature ({bottom_hole_temp:.0f} °C) is within "
+                f"Bottom-hole temperature ({bottom_hole_temp:.0f} °C) is within "
                 f"{temp_margin:.0f} °C of the {cement_class} rating "
                 f"({cement['Max_Temperature_C']:.0f} °C). Consider a thermal stabilizer."
             )
         else:
             st.success(
-                f"✅ Temperature rating OK — {bottom_hole_temp:.0f} °C is "
+                f"Temperature rating OK — {bottom_hole_temp:.0f} °C is "
                 f"{temp_margin:.0f} °C below the {cement_class} limit."
             )
 
         if excess_percent > EXCESS_WARNING_THRESHOLD:
             st.warning(
-                f"⚠️ Excess of {excess_percent:.0f}% is very high. This suggests severe "
+                f"Excess of {excess_percent:.0f}% is very high. This suggests severe "
                 "borehole washout — verify hole caliper data before pumping."
             )
 
         for row in additive_rows:
             if bottom_hole_temp > row["Max Temp (°C)"]:
                 st.warning(
-                    f"⚠️ Additive {row['Additive']} is rated to {row['Max Temp (°C)']:.0f} °C "
+                    f"Additive {row['Additive']} is rated to {row['Max Temp (°C)']:.0f} °C "
                     f"but bottom-hole temperature is {bottom_hole_temp:.0f} °C."
                 )
 

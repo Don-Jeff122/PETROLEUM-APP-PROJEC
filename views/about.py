@@ -7,7 +7,7 @@ from views.ui_style import page_header, section_title
 def show():
 
     page_header(
-        "ℹ",
+        "info",
         "About PyMudCement-Optima",
         "Drilling fluid and cementing engineering software.",
     )
@@ -48,27 +48,27 @@ def show():
                 """
                 <div class="module-list">
                     <div class="module-item">
-                        <div class="mi-icon">🛢</div>
+                        <div class="mi-icon"><span class="material-symbols-outlined">oil_barrel</span></div>
                         <div class="mi-name">Mud Weight Design</div>
                     </div>
                     <div class="module-item">
-                        <div class="mi-icon">🧪</div>
+                        <div class="mi-icon"><span class="material-symbols-outlined">science</span></div>
                         <div class="mi-name">Rheology Analysis</div>
                     </div>
                     <div class="module-item">
-                        <div class="mi-icon">🌊</div>
+                        <div class="mi-icon"><span class="material-symbols-outlined">waves</span></div>
                         <div class="mi-name">Hydraulics</div>
                     </div>
                     <div class="module-item">
-                        <div class="mi-icon">🏗</div>
+                        <div class="mi-icon"><span class="material-symbols-outlined">construction</span></div>
                         <div class="mi-name">Cement Design</div>
                     </div>
                     <div class="module-item">
-                        <div class="mi-icon">🛑</div>
+                        <div class="mi-icon"><span class="material-symbols-outlined">block</span></div>
                         <div class="mi-name">Plug Design</div>
                     </div>
                     <div class="module-item">
-                        <div class="mi-icon">📊</div>
+                        <div class="mi-icon"><span class="material-symbols-outlined">monitoring</span></div>
                         <div class="mi-name">Results Dashboard</div>
                     </div>
                 </div>
