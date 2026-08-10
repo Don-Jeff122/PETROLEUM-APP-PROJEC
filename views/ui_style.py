@@ -1,3 +1,4 @@
+from functools import lru_cache
 from pathlib import Path
 
 import pandas as pd
@@ -992,14 +993,27 @@ def bind_top_bar():
     )
 
 
+@lru_cache(maxsize=1)
+def _logo_data_uri():
+    """Return the top-bar logo as a base64 data URI so it renders without
+    depending on /app/static file serving (works on Streamlit Cloud)."""
+    import base64
+
+    return base64.b64encode(Path("static/JEFFY-LOGO-80.png").read_bytes()).decode("ascii")
+
+
 def render_top_bar():
     """Render the fixed white top bar: hamburger (three bars) that toggles
     the sidebar, the company logo + app name, and a home icon button."""
     from modules.constants import APP_NAME, APP_TAGLINE
 
-    logo = Path("static/JEFFY-LOGO.png")
+    logo = Path("static/JEFFY-LOGO-80.png")
     if logo.exists():
-        logo_html = f'<img src="/app/static/JEFFY-LOGO.png" class="top-bar-logo" alt="{APP_NAME} logo" />'
+        logo_html = (
+            '<img src="data:image/png;base64,'
+            + _logo_data_uri()
+            + f'" class="top-bar-logo" alt="{APP_NAME} logo" />'
+        )
     else:
         logo_html = (
             '<div class="top-bar-logo" style="width:40px;height:40px;display:flex;align-items:center;'
