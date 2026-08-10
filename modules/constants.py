@@ -26,6 +26,6 @@ TAIL_SLURRY_PERCENT = 60           # default tail slurry fraction (%)
 APP_NAME = "PyMudCement-Optima"
 APP_TAGLINE = "Drilling & Cementing Engineering"
 APP_VERSION = "1.1"
-AUTHOR = "Group ..."
+AUTHOR = "Group"
 UNIVERSITY = "University of Energy and Natural Resources (UENR)"
 DEPARTMENT = "Petroleum and Natural Gas Engineering"
