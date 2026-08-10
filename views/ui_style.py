@@ -1,6 +1,7 @@
+from pathlib import Path
+
 import pandas as pd
 import streamlit as st
-import streamlit.components.v1 as components
 
 
 def inject_global_css():
@@ -58,9 +59,21 @@ def inject_global_css():
         }
 
         .block-container {
-            padding-top: 1.25rem;
+            padding-top: 60px;
             padding-bottom: 2.5rem;
             max-width: 1500px;
+        }
+
+        /* The main column is preceded by three invisible 0-height elements
+           (the global <style> block, the fixed top-bar markdown and the bind
+           iframe). Streamlit still inserts its 1rem vertical gap between
+           them, pushing real content ~48px below the fixed bar. Cancel each
+           gap with an equal negative bottom margin so content starts right
+           under the bar. */
+        .block-container [data-testid="stElementContainer"]:has(style),
+        .block-container [data-testid="stElementContainer"]:has(.top-bar),
+        .block-container [data-testid="stElementContainer"]:has(iframe) {
+            margin-bottom: -1rem;
         }
 
         /* sidebar */
@@ -90,7 +103,7 @@ def inject_global_css():
             transform: scale(0.9);
         }
         [data-testid="stSidebar"] > div:first-child {
-            padding-top: 0.5rem;
+            padding-top: 60px;
         }
         [data-testid="stSidebar"] * {
             color: #CBD5E1;
@@ -668,7 +681,76 @@ def inject_global_css():
         #MainMenu {visibility: hidden;}
         footer {visibility: hidden;}
         header[data-testid="stHeader"] {
-            background: transparent;
+            display: none;
+        }
+
+        /* top bar */
+        .top-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 999999;
+            height: 60px;
+            background: #FFFFFF;
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+            padding: 0 1rem;
+            box-shadow: 0 1px 3px rgba(15, 23, 42, 0.12);
+        }
+        .top-bar .top-bar-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 0.4rem;
+            border-radius: 8px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: #334155;
+            transition: background-color 0.2s ease;
+        }
+        .top-bar .top-bar-btn:hover {
+            background: #EEF2F7;
+        }
+        .top-bar .top-bar-btn .material-symbols-outlined {
+            font-size: 24px;
+            color: #0A2540;
+        }
+        .top-bar .top-bar-brand {
+            display: flex;
+            align-items: center;
+            gap: 0.65rem;
+            margin-left: 0.25rem;
+        }
+        .top-bar .top-bar-logo {
+            width: 40px;
+            height: 40px;
+            object-fit: contain;
+        }
+        .top-bar .top-bar-text {
+            line-height: 1.2;
+        }
+        .top-bar .top-bar-name {
+            font-size: 1.02rem;
+            font-weight: 800;
+            color: #0A2540;
+            letter-spacing: 0.01em;
+        }
+        .top-bar .top-bar-tagline {
+            font-size: 0.64rem;
+            font-weight: 500;
+            color: #64748B;
+        }
+        .top-bar .top-bar-actions {
+            margin-left: auto;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+        @media (max-width: 480px) {
+            .top-bar .top-bar-tagline { display: none; }
         }
         </style>
         """,
@@ -704,27 +786,34 @@ def section_title(label: str, title: str):
     )
 
 
-def _run_script(script: str):
+def _run_script(script: str, rerun: bool = True):
     """Embed a script inside a hidden same-origin iframe so it can drive the
     parent app page (scrolling, closing the sidebar, etc.).
 
-    A unique nonce is embedded in the iframe's srcdoc on every call. Without
-    it, Streamlit keeps the iframe's srcDoc unchanged across reruns, the
-    iframe is not reloaded, and the embedded script only executes once per
-    page load (e.g. the sidebar only auto-collapses on the first navigation).
-    """
-    import time
+    When ``rerun`` is True (default), a unique nonce is embedded in the
+    iframe's srcdoc on every call so Streamlit reloads the iframe on every
+    rerun and the script re-executes — required for one-shot actions that
+    must run again after navigation (e.g. auto-collapsing the sidebar).
 
-    nonce = f"{time.time_ns()}"
-    components.html(
+    Scripts that install persistent listeners (top bar, feature cards) pass
+    ``rerun=False``: the srcdoc is identical on every rerun, the iframe is
+    never reloaded, and its realm — and therefore its document-level
+    listener — survives across reruns without being re-attached or dropped.
+    """
+    nonce_comment = ""
+    if rerun:
+        import time
+
+        nonce_comment = f"<!-- nonce:{time.time_ns()} -->"
+    st.iframe(
         f"""
         <html><body style='margin:0;padding:0;overflow:hidden;'>
         {script}
-        <!-- nonce:{nonce} -->
+        {nonce_comment}
         </body></html>
         """,
-        height=1,
         width=1,
+        height=1,
     )
 
 
@@ -826,58 +915,149 @@ def close_sidebar():
     )
 
 
-def bind_feature_cards():
-    """Make the Home feature cards navigate to their module pages on click.
+def bind_top_bar():
+    """Wire the top bar buttons: the hamburger toggles the sidebar and the
+    home icon navigates to the Home page.
 
-    The cards are plain divs (not links), each carrying a ``data-page``
-    attribute that matches a sidebar radio option. This script (inside a
-    hidden same-origin iframe, same mechanism as ``close_sidebar``) simulates
-    a click on that radio option so Streamlit itself performs the navigation
-    — no URL change and no full page reload.
+    Uses a document-level delegation listener bound once via ``_run_script``
+    with ``rerun=False``: because the iframe srcdoc never changes, Streamlit
+    never reloads the iframe, so the listener's realm survives every rerun
+    and the buttons keep working after navigation with no stale or duplicate
+    bindings.
     """
     _run_script(
         """
         <script>
         (function () {
             var doc = window.parent.document;
-            var tries = 0;
-            function bind() {
-                var cards = doc.querySelectorAll('.feature-card[data-page]');
-                if (!cards.length) return false;
-                for (var i = 0; i < cards.length; i++) {
-                    (function (card) {
-                        if (card.dataset.bound) return;
-                        card.dataset.bound = '1';
-                        card.addEventListener('click', function () {
-                            var target = (card.getAttribute('data-page') || '').trim();
-                            // textContent (not innerText) so matching still works
-                            // when the sidebar is collapsed/hidden.
-                            var options = doc.querySelectorAll(
-                                '[data-testid="stSidebar"] label[data-testid="stRadioOption"]'
-                            );
-                            for (var j = 0; j < options.length; j++) {
-                                var text = (options[j].textContent || '')
-                                    .replace(/\\s+/g, ' ').trim();
-                                if (text === target) {
-                                    var input = options[j].querySelector('input[type="radio"]');
-                                    if (input) { input.click(); } else { options[j].click(); }
-                                    return;
-                                }
-                            }
-                            console.warn('[feature-card] no sidebar option for:', target);
-                        });
-                    })(cards[i]);
+            function toggleSidebar() {
+                var sb = doc.querySelector('[data-testid="stSidebar"]');
+                if (!sb) return;
+                var open = sb.getAttribute('aria-expanded') !== 'false';
+                if (open) {
+                    var wrap = doc.querySelector('[data-testid="stSidebarCollapseButton"]');
+                    if (wrap) {
+                        var btn = wrap.querySelector('button') || wrap;
+                        btn.click();
+                    }
+                } else {
+                    var toggle = doc.querySelector('button[data-testid="stExpandSidebarButton"]');
+                    if (toggle) toggle.click();
                 }
-                return true;
             }
-            if (bind()) return;
-            var timer = setInterval(function () {
-                tries += 1;
-                if (bind() || tries > 25) clearInterval(timer);
-            }, 100);
+            function navigateTo(labelText) {
+                // Click the radio label (not the visually hidden input): the
+                // input's synthetic click is ignored when the sidebar is
+                // collapsed, while the label always registers the navigation.
+                var options = doc.querySelectorAll(
+                    '[data-testid="stSidebar"] label[data-testid="stRadioOption"]'
+                );
+                for (var j = 0; j < options.length; j++) {
+                    var text = (options[j].textContent || '')
+                        .replace(/\\s+/g, ' ').trim();
+                    if (text === labelText) {
+                        options[j].click();
+                        return;
+                    }
+                }
+            }
+            doc.addEventListener('click', function (e) {
+                var t = e.target;
+                if (!t || !t.closest) return;
+                if (t.closest('#top-bar-menu')) toggleSidebar();
+                else if (t.closest('#top-bar-home')) navigateTo('Home');
+            });
         })();
         </script>
+        """,
+        rerun=False,
+    )
+
+
+def render_top_bar():
+    """Render the fixed white top bar: hamburger (three bars) that toggles
+    the sidebar, the company logo + app name, and a home icon button."""
+    from modules.constants import APP_NAME, APP_TAGLINE
+
+    logo = Path("static/JEFFY-LOGO.png")
+    if logo.exists():
+        logo_html = f'<img src="/app/static/JEFFY-LOGO.png" class="top-bar-logo" alt="{APP_NAME} logo" />'
+    else:
+        logo_html = (
+            '<div class="top-bar-logo" style="width:40px;height:40px;display:flex;align-items:center;'
+            'justify-content:center;background:#1565A8;border-radius:8px;">'
+            '<span class="material-symbols-outlined" style="font-size:22px;color:#fff;">oil_barrel</span>'
+            "</div>"
+        )
+
+    st.markdown(
+        f"""
+        <div class="top-bar">
+            <button class="top-bar-btn" id="top-bar-menu"
+                    title="Toggle navigation sidebar" aria-label="Toggle sidebar">
+                <span class="material-symbols-outlined">menu</span>
+            </button>
+            <div class="top-bar-brand">
+                {logo_html}
+                <div class="top-bar-text">
+                    <div class="top-bar-name">{APP_NAME}</div>
+                    <div class="top-bar-tagline">{APP_TAGLINE}</div>
+                </div>
+            </div>
+            <div class="top-bar-actions">
+                <button class="top-bar-btn" id="top-bar-home"
+                        title="Go to Home" aria-label="Home">
+                    <span class="material-symbols-outlined">home</span>
+                </button>
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+    bind_top_bar()
+
+
+def bind_feature_cards():
+    """Make the Home feature cards navigate to their module pages on click.
+
+    The cards are plain divs (not links), each carrying a ``data-page``
+    attribute that matches a sidebar radio option. A document-level
+    delegation listener (installed once with ``rerun=False`` so it survives
+    every rerun) simulates a click on that radio option so Streamlit itself
+    performs the navigation — no URL change and no full page reload. Because
+    it is delegated, cards re-rendered by Streamlit keep working without
+    re-binding.
+    """
+    _run_script(
         """
+        <script>
+        (function () {
+            var doc = window.parent.document;
+            doc.addEventListener('click', function (e) {
+                var t = e.target;
+                if (!t || !t.closest) return;
+                var card = t.closest('.feature-card[data-page]');
+                if (!card) return;
+                var target = (card.getAttribute('data-page') || '').trim();
+                // Click the radio label (not the input) so navigation also
+                // works while the sidebar is collapsed; textContent (not
+                // innerText) so matching works when it is hidden.
+                var options = doc.querySelectorAll(
+                    '[data-testid="stSidebar"] label[data-testid="stRadioOption"]'
+                );
+                for (var j = 0; j < options.length; j++) {
+                    var text = (options[j].textContent || '')
+                        .replace(/\\s+/g, ' ').trim();
+                    if (text === target) {
+                        options[j].click();
+                        return;
+                    }
+                }
+            });
+        })();
+        </script>
+        """,
+        rerun=False,
     )
 
 

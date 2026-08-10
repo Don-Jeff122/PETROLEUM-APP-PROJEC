@@ -1,5 +1,4 @@
 import mimetypes
-from pathlib import Path
 
 import streamlit as st
 
@@ -14,7 +13,12 @@ from views import (
     about,
 )
 from modules.constants import APP_NAME, APP_TAGLINE, APP_VERSION, AUTHOR
-from views.ui_style import inject_global_css, close_sidebar, bind_feature_cards
+from views.ui_style import (
+    inject_global_css,
+    close_sidebar,
+    bind_feature_cards,
+    render_top_bar,
+)
 
 # Serve .woff2 fonts with the correct content type (Windows mimetypes lacks it)
 mimetypes.add_type("font/woff2", ".woff2")
@@ -27,33 +31,10 @@ st.set_page_config(
 )
 
 inject_global_css()
+render_top_bar()
 
 # ── Sidebar ──────────────────────────────────────────────────────────────────
 with st.sidebar:
-    logo_col, name_col = st.columns([1, 2.2], vertical_alignment="top")
-
-    with logo_col:
-        logo_path = Path("assets/JEFFY-LOGO.png")
-        if logo_path.exists():
-            st.image(str(logo_path), width=52)
-        else:
-            st.markdown(
-                '<div class="logo-fallback"><span class="material-symbols-outlined">oil_barrel</span></div>',
-                unsafe_allow_html=True,
-            )
-
-    with name_col:
-        st.markdown(
-            f"""
-            <div class="sidebar-brand">
-                <div class="app-name">{APP_NAME}</div>
-                <div class="app-tagline">{APP_TAGLINE}</div>
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
-
-    st.markdown("---")
     st.markdown('<div class="nav-section-label">Navigation</div>', unsafe_allow_html=True)
 
     page = st.radio(
