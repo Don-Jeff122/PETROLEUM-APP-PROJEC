@@ -11,6 +11,9 @@ from views.ui_style import (
     apply_plotly_style,
     begin_calculation,
     calculated_button,
+    save_calculation,
+    results_current,
+    clear_results_button,
 )
 
 
@@ -25,14 +28,21 @@ def show():
     input_col, info_col = st.columns([1.2, 1], gap="large")
 
     with input_col:
-        with st.container(border=True):
+        with st.container(border=True, key="module-first-card"):
             section_title("Inputs", "Viscometer Readings")
 
             reading_600 = st.number_input("600 RPM Reading", value=60.0)
             reading_300 = st.number_input("300 RPM Reading", value=40.0)
 
+            inputs = {
+                "600 RPM Reading": reading_600,
+                "300 RPM Reading": reading_300,
+            }
             calculate = calculated_button(
-                "Calculate Rheology", "rheology_results", "calculate_rheology"
+                "Calculate Rheology",
+                "rheology_results",
+                "calculate_rheology",
+                inputs=inputs,
             )
 
     with info_col:
@@ -51,22 +61,24 @@ def show():
                 """
             )
 
-    if calculate:
-        begin_calculation("Calculating Rheology…")
+    if calculate or results_current("rheology_results", inputs):
+        if calculate:
+            begin_calculation("Calculating Rheology…")
 
-        valid, message = validate_inputs(reading_600, reading_300)
+            valid, message = validate_inputs(reading_600, reading_300)
 
-        if not valid:
-            st.error(message)
-            return
+            if not valid:
+                st.error(message)
+                return
 
         pv = calculate_pv(reading_600, reading_300)
         yp = calculate_yp(reading_300, pv)
 
-        st.session_state["rheology_results"] = {
-            "Plastic Viscosity": pv,
-            "Yield Point": yp,
-        }
+        if calculate:
+            save_calculation("rheology_results", {
+                "Plastic Viscosity": pv,
+                "Yield Point": yp,
+            }, inputs)
 
         st.divider()
         section_title("Analysis", "Shear Stress vs Shear Rate")
@@ -114,6 +126,8 @@ def show():
                     f"{yp:.2f} lb/100 ft²",
                 ],
             )
+
+        clear_results_button("rheology_results")
 
         if pv < 10:
             st.warning("Plastic Viscosity is low.")

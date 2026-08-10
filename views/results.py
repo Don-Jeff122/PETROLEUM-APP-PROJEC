@@ -225,5 +225,7 @@ def show():
             for key in keys:
                 if key in st.session_state:
                     del st.session_state[key]
+                if f"{key}_inputs" in st.session_state:
+                    del st.session_state[f"{key}_inputs"]
             st.success("All saved results have been cleared.")
             st.rerun()

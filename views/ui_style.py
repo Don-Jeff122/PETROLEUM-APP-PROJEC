@@ -60,7 +60,7 @@ def inject_global_css():
         .block-container {
             padding-top: 1.25rem;
             padding-bottom: 2.5rem;
-            max-width: 1180px;
+            max-width: 1500px;
         }
 
         /* sidebar */
@@ -90,7 +90,7 @@ def inject_global_css():
             transform: scale(0.9);
         }
         [data-testid="stSidebar"] > div:first-child {
-            padding-top: 1.25rem;
+            padding-top: 0.5rem;
         }
         [data-testid="stSidebar"] * {
             color: #CBD5E1;
@@ -212,42 +212,77 @@ def inject_global_css():
         /* home hero */
         .home-hero {
             background: #0A2540;
-            border-radius: 14px;
-            padding: 2.5rem 3rem;
-            margin-bottom: 1.5rem;
+            border-radius: 12px;
+            padding: 1.5rem 2rem;
+            margin: 0.5rem 0 1.1rem 0;
         }
         .home-hero h1 {
-            font-size: 2rem;
+            font-family: Georgia, 'Times New Roman', serif;
+            font-size: 1.55rem;
             font-weight: 700;
+            letter-spacing: 0.01em;
             color: #FFFFFF !important;
-            margin: 0 0 0.5rem 0;
+            margin: 0 0 0.35rem 0;
         }
         .home-hero h1 .material-symbols-outlined {
-            font-size: 2rem;
+            font-size: 1.55rem;
             color: #C9A227;
-            vertical-align: -6px;
+            vertical-align: -4px;
             margin-right: 0.4rem;
         }
         .home-hero .hero-sub {
-            font-size: 0.95rem;
+            font-size: 0.84rem;
             color: #94A3B8 !important;
-            margin: 0 0 1rem 0;
+            margin: 0 0 0.8rem 0;
             max-width: 540px;
-            line-height: 1.5;
+            line-height: 1.45;
         }
         .home-hero .hero-badges {
             display: flex;
-            gap: 0.5rem;
+            gap: 0.4rem;
             flex-wrap: wrap;
         }
         .hero-badge {
             background: rgba(255,255,255,0.1);
             border: 1px solid rgba(255,255,255,0.15);
             border-radius: 20px;
-            padding: 0.3rem 0.85rem;
-            font-size: 0.72rem;
+            padding: 0.22rem 0.7rem;
+            font-size: 0.66rem;
             font-weight: 600;
             color: #E2E8F0;
+        }
+
+        /* home stats (text-only, sits directly on the page background) */
+        .home-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.7rem;
+            margin: 0 0 0.3rem 0;
+        }
+        @media (max-width: 700px) {
+            .home-stats { grid-template-columns: 1fr; gap: 0.5rem; }
+        }
+        .home-stat {
+            padding: 0.2rem 0;
+        }
+        .home-stat .hs-label {
+            font-size: 0.68rem;
+            font-weight: 700;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: #64748B;
+        }
+        .home-stat .hs-value {
+            font-size: 1.55rem;
+            font-weight: 700;
+            color: #0A2540;
+            line-height: 1.15;
+            margin-top: 0.15rem;
+        }
+        .home-stat .hs-delta {
+            font-size: 0.78rem;
+            color: #94A3B8;
+            margin-top: 0.15rem;
         }
 
         /* section labels */
@@ -266,21 +301,47 @@ def inject_global_css():
             margin: 0 0 0.85rem 0;
         }
 
-        /* bordered panels */
-        [data-testid="stVerticalBlockBorderWrapper"] {
-            background: #FFFFFF;
-            border: 1px solid #E2E8F0 !important;
-            border-radius: 10px !important;
-            box-shadow: 0 1px 4px rgba(15,23,42,0.04);
-            padding: 0.25rem;
+        /* bordered panels: st.container(border=True) renders a
+           FlexContainer with data-testid="stVerticalBlock" in this version,
+           so target it directly to strip the outline (kept bg/radius). */
+        [data-testid="stVerticalBlock"] {
+            border: none !important;
+        }
+
+        /* widgets/panels that also draw outlines */
+        [data-testid="stNumberInput"] [data-baseweb="input"],
+        [data-testid="stNumberInput"] input,
+        [data-testid="stTextInput"] [data-baseweb="input"],
+        [data-testid="stTextInput"] input,
+        [data-testid="stTextArea"] [data-baseweb="textarea"],
+        [data-testid="stTextArea"] textarea,
+        [data-testid="stSelectbox"] [data-baseweb="select"],
+        [data-testid="stMultiSelect"] [data-baseweb="select"],
+        [data-testid="stDataFrame"],
+        [data-testid="stDataEditor"],
+        [data-testid="stTabs"] [data-baseweb="tab-list"],
+        [data-testid="stExpander"] [data-testid="stExpanderDetails"],
+        [data-testid="stPopover"] > div,
+        [data-testid="stSlider"] [data-baseweb="slider"] {
+            border: none !important;
+            box-shadow: none !important;
+            outline: none !important;
+        }
+
+        /* push the first card on every module down a little */
+        [class*="st-key-module-first-card"] {
+            margin-top: 0.5rem;
         }
 
         /* feature cards (home) */
         .feature-grid {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 1rem;
-            margin: 1.25rem 0 0.5rem 0;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 0.7rem;
+            margin: 0.9rem 0 0.4rem 0;
+        }
+        @media (max-width: 1200px) {
+            .feature-grid { grid-template-columns: repeat(3, 1fr); }
         }
         @media (max-width: 900px) {
             .feature-grid { grid-template-columns: repeat(2, 1fr); }
@@ -290,53 +351,70 @@ def inject_global_css():
         }
         .feature-card {
             background: #FFFFFF;
-            border: 1px solid #E2E8F0;
+            border: none;
             border-radius: 10px;
-            padding: 1.25rem;
+            padding: 0.8rem 0.9rem;
             box-shadow: 0 1px 4px rgba(0,0,0,0.03);
+            cursor: pointer;
+            transition: box-shadow 0.2s ease, transform 0.15s ease;
+        }
+        .feature-card:hover {
+            box-shadow: 0 0 0 1px #C9A227, 0 4px 14px rgba(10, 37, 64, 0.12);
+            transform: translateY(-2px);
+        }
+        .feature-head {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            margin-bottom: 0.4rem;
         }
         .feature-icon {
-            width: 40px;
-            height: 40px;
+            width: 32px;
+            height: 32px;
             background: #EEF2F7;
             border-radius: 8px;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-bottom: 0.75rem;
+            flex-shrink: 0;
         }
         .feature-icon .material-symbols-outlined {
-            font-size: 22px;
+            font-size: 19px;
             color: #1565A8;
         }
         .feature-card h3 {
-            font-size: 0.9rem;
-            font-weight: 600;
+            font-family: Georgia, 'Times New Roman', serif;
+            font-size: 0.95rem;
+            font-weight: 700;
             color: #0A2540;
-            margin: 0 0 0.35rem 0;
+            margin: 0;
         }
         .feature-card p {
-            font-size: 0.78rem;
+            font-size: 0.74rem;
             color: #64748B;
             margin: 0;
-            line-height: 1.5;
+            line-height: 1.45;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
         }
 
         /* metrics */
         [data-testid="stMetric"] {
             background: #FFFFFF;
-            border: 1px solid #E2E8F0;
+            border: none;
             border-radius: 8px;
-            padding: 0.75rem 1rem;
+            padding: 0.5rem 0.9rem;
         }
         [data-testid="stMetricLabel"] {
-            font-size: 0.75rem !important;
+            font-size: 0.7rem !important;
             color: #64748B !important;
             font-weight: 600 !important;
             text-transform: uppercase;
         }
         [data-testid="stMetricValue"] {
-            font-size: 1.3rem !important;
+            font-size: 1.15rem !important;
             color: #0A2540 !important;
             font-weight: 700 !important;
         }
@@ -399,6 +477,26 @@ def inject_global_css():
             box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.35);
         }
 
+        /* clear buttons are outlined-red so they read as a destructive
+           action, distinct from the dark Calculate buttons. The st-key-
+           class is added by Streamlit from the button key. */
+        .stButton button[class*="st-key-clear"] {
+            background: #FFFFFF !important;
+            color: #B91C1C !important;
+            border: 1px solid #FECACA !important;
+            font-weight: 600 !important;
+        }
+        .stButton button[class*="st-key-clear"]:hover:not(:disabled) {
+            background: #FEF2F2 !important;
+            color: #991B1B !important;
+            border-color: #FCA5A5 !important;
+            box-shadow: 0 2px 10px rgba(185, 28, 28, 0.18);
+        }
+        .stButton button[class*="st-key-clear"]:active:not(:disabled) {
+            background: #FEE2E2 !important;
+            transform: scale(0.97);
+        }
+
         .stDownloadButton > button {
             background: #059669 !important;
             transition: background-color 0.2s ease, transform 0.1s ease;
@@ -427,7 +525,7 @@ def inject_global_css():
 
         /* data tables */
         [data-testid="stDataFrame"] {
-            border: 1px solid #E2E8F0;
+            border: none;
             border-radius: 8px;
             overflow: hidden;
         }
@@ -435,7 +533,7 @@ def inject_global_css():
         /* progress bar */
         .progress-card {
             background: #FFFFFF;
-            border: 1px solid #E2E8F0;
+            border: none;
             border-radius: 10px;
             padding: 1.25rem 1.5rem;
             margin-bottom: 1.25rem;
@@ -506,7 +604,7 @@ def inject_global_css():
             gap: 0.75rem;
             padding: 0.6rem 0.85rem;
             background: #F8FAFC;
-            border: 1px solid #E2E8F0;
+            border: none;
             border-radius: 8px;
         }
         .module-item .mi-icon {
@@ -557,7 +655,6 @@ def inject_global_css():
         /* home callout */
         .home-callout {
             background: #F8FAFC;
-            border: 1px solid #E2E8F0;
             border-left: 4px solid #C9A227;
             border-radius: 8px;
             padding: 1rem 1.25rem;
@@ -609,11 +706,21 @@ def section_title(label: str, title: str):
 
 def _run_script(script: str):
     """Embed a script inside a hidden same-origin iframe so it can drive the
-    parent app page (scrolling, closing the sidebar, etc.)."""
+    parent app page (scrolling, closing the sidebar, etc.).
+
+    A unique nonce is embedded in the iframe's srcdoc on every call. Without
+    it, Streamlit keeps the iframe's srcDoc unchanged across reruns, the
+    iframe is not reloaded, and the embedded script only executes once per
+    page load (e.g. the sidebar only auto-collapses on the first navigation).
+    """
+    import time
+
+    nonce = f"{time.time_ns()}"
     components.html(
         f"""
         <html><body style='margin:0;padding:0;overflow:hidden;'>
         {script}
+        <!-- nonce:{nonce} -->
         </body></html>
         """,
         height=1,
@@ -662,47 +769,111 @@ def close_sidebar():
     """Collapse the sidebar automatically after the user picks a page,
     so the module content is fully visible.
 
-    Runs a script inside a same-origin iframe that clicks Streamlit's
-    native sidebar collapse button (stSidebarCollapseButton). Clicking
-    this button triggers Streamlit's own collapse state, which keeps
-    the expand/hamburger button (stExpandSidebarButton) visible.
+    Runs a script inside a same-origin iframe that first checks Streamlit's
+    own sidebar state via the ``aria-expanded`` attribute on the sidebar
+    root. If the sidebar is already collapsed it does nothing (this prevents
+    a stray click from re-opening it, which matters on mobile where the
+    drawer may already close on selection). Otherwise it clicks the native
+    collapse button (stSidebarCollapseButton) — or falls back to the header
+    hamburger toggle — and keeps polling until the sidebar reports closed.
     """
     _run_script(
         """
         <script>
         (function () {
-            // Click the real <button> inside Streamlit's sidebar collapse
-            // wrapper. The wrapper div (stSidebarCollapseButton) has no
-            // handler of its own; only the inner button toggles the sidebar,
-            // which makes Streamlit show the hamburger expand button too.
-            function findAndClick() {
-                var doc = window.parent.document;
+            var doc = window.parent.document;
+            var tries = 0;
+            var clickedOnce = false;
+            // The sidebar root exposes aria-expanded=false when it is
+            // collapsed (desktop rail or hidden mobile drawer).
+            function sidebarOpen() {
+                var sb = doc.querySelector('[data-testid="stSidebar"]');
+                if (!sb) return null;
+                return sb.getAttribute('aria-expanded') !== 'false';
+            }
+            function clickCollapse() {
                 var wrapper = doc.querySelector('[data-testid="stSidebarCollapseButton"]');
                 if (wrapper) {
                     var btn = wrapper.querySelector('button') || wrapper;
                     btn.click();
                     return true;
                 }
-                var selectors = [
-                    'button[data-testid="stSidebarCollapseButton"]',
-                    'button[data-testid="collapsedControl"]',
-                    'section[data-testid="stSidebar"] button:first-child'
-                ];
-                for (var i = 0; i < selectors.length; i++) {
-                    var btn = doc.querySelector(selectors[i]);
-                    if (btn) {
-                        btn.click();
-                        return true;
-                    }
+                var toggle = doc.querySelector('button[data-testid="stExpandSidebarButton"]');
+                if (toggle) {
+                    toggle.click();
+                    return true;
                 }
                 return false;
             }
-            if (findAndClick()) return;
-            // Retry a few times in case the sidebar is still rendering
-            var tries = 0;
+            function attempt() {
+                var open = sidebarOpen();
+                if (open === null) return false; // sidebar not rendered yet
+                if (open === false) return true; // already collapsed - done
+                if (!clickedOnce) {
+                    clickedOnce = true;
+                    clickCollapse();
+                }
+                return false; // keep polling until aria-expanded flips
+            }
+            if (attempt()) return;
             var timer = setInterval(function () {
                 tries += 1;
-                if (findAndClick() || tries > 30) clearInterval(timer);
+                if (attempt() || tries > 30) clearInterval(timer);
+            }, 120);
+        })();
+        </script>
+        """
+    )
+
+
+def bind_feature_cards():
+    """Make the Home feature cards navigate to their module pages on click.
+
+    The cards are plain divs (not links), each carrying a ``data-page``
+    attribute that matches a sidebar radio option. This script (inside a
+    hidden same-origin iframe, same mechanism as ``close_sidebar``) simulates
+    a click on that radio option so Streamlit itself performs the navigation
+    — no URL change and no full page reload.
+    """
+    _run_script(
+        """
+        <script>
+        (function () {
+            var doc = window.parent.document;
+            var tries = 0;
+            function bind() {
+                var cards = doc.querySelectorAll('.feature-card[data-page]');
+                if (!cards.length) return false;
+                for (var i = 0; i < cards.length; i++) {
+                    (function (card) {
+                        if (card.dataset.bound) return;
+                        card.dataset.bound = '1';
+                        card.addEventListener('click', function () {
+                            var target = (card.getAttribute('data-page') || '').trim();
+                            // textContent (not innerText) so matching still works
+                            // when the sidebar is collapsed/hidden.
+                            var options = doc.querySelectorAll(
+                                '[data-testid="stSidebar"] label[data-testid="stRadioOption"]'
+                            );
+                            for (var j = 0; j < options.length; j++) {
+                                var text = (options[j].textContent || '')
+                                    .replace(/\\s+/g, ' ').trim();
+                                if (text === target) {
+                                    var input = options[j].querySelector('input[type="radio"]');
+                                    if (input) { input.click(); } else { options[j].click(); }
+                                    return;
+                                }
+                            }
+                            console.warn('[feature-card] no sidebar option for:', target);
+                        });
+                    })(cards[i]);
+                }
+                return true;
+            }
+            if (bind()) return;
+            var timer = setInterval(function () {
+                tries += 1;
+                if (bind() || tries > 25) clearInterval(timer);
             }, 100);
         })();
         </script>
@@ -710,17 +881,76 @@ def close_sidebar():
     )
 
 
-def calculated_button(default_label: str, state_key: str, key: str):
+def calculated_button(default_label: str, state_key: str, key: str, inputs=None):
     """Render a Calculate button that turns green and reads 'Calculated'
-    once results are stored in session state, so the user gets durable
-    confirmation that the calculation ran."""
+    after a successful calculation, and flips back to 'Calculate' whenever
+    any input changes.
+
+    ``done`` is true when results exist in session state AND the current
+    inputs still match the snapshot saved with those results. On the very
+    run where the button is clicked, the results are only saved later in
+    that run, so the click state (already present in session state before
+    the widget is instantiated) is used instead to show the green
+    'Calculated' state immediately.
+    """
+    clicked_this_run = bool(st.session_state.get(key, False))
     done = state_key in st.session_state
+    if done and inputs is not None:
+        done = st.session_state.get(f"{state_key}_inputs") == inputs
+    done = done or clicked_this_run
     return st.button(
         "Calculated" if done else default_label,
         width="stretch",
         type="primary" if done else "secondary",
         key=key,
     )
+
+
+def save_calculation(state_key: str, results: dict, inputs=None):
+    """Store calculation results together with a snapshot of the inputs that
+    produced them. ``calculated_button`` compares the current inputs against
+    this snapshot to detect stale results."""
+    st.session_state[state_key] = results
+    if inputs is not None:
+        st.session_state[f"{state_key}_inputs"] = dict(inputs)
+
+
+def _clear_saved_results(state_key: str):
+    """Delete a module's saved results and input snapshot from session state."""
+    for key in (state_key, f"{state_key}_inputs"):
+        if key in st.session_state:
+            del st.session_state[key]
+
+
+def results_current(state_key: str, inputs=None) -> bool:
+    """True when saved results exist and (if ``inputs`` is given) they were
+    computed from exactly the current inputs. Used to re-render a module's
+    results when the user returns to it without re-running the calculation."""
+    if state_key not in st.session_state:
+        return False
+    if inputs is None:
+        return True
+    return st.session_state.get(f"{state_key}_inputs") == inputs
+
+
+def clear_results_button(state_key: str, label: str = "Clear Results"):
+    """Render a red 'Clear' button at the bottom-right of a module's results.
+
+    Clicking it removes the saved results (and their input snapshot) from
+    session state so the calculation no longer lingers on the site. The
+    deletion runs in an ``on_click`` callback, which fires before the script
+    body re-runs — important because the results (and this button) are only
+    rendered inside the ``if calculate:`` block.
+    """
+    _, right = st.columns([4, 1], vertical_alignment="bottom")
+    with right:
+        st.button(
+            label,
+            key=f"clear_{state_key}",
+            width="stretch",
+            on_click=_clear_saved_results,
+            args=(state_key,),
+        )
 
 
 def begin_calculation(message: str):

@@ -15,6 +15,9 @@ from views.ui_style import (
     results_table,
     begin_calculation,
     calculated_button,
+    save_calculation,
+    results_current,
+    clear_results_button,
 )
 
 
@@ -28,7 +31,7 @@ def show():
 
     database = load_cement_database()
 
-    with st.container(border=True):
+    with st.container(border=True, key="module-first-card"):
         section_title("Step 1", "Select Cement Class")
         cement_class = st.selectbox(
             "Cement Class",
@@ -82,8 +85,20 @@ def show():
                 value=1200.0,
             )
 
+            inputs = {
+                "Cement Class": cement_class,
+                "Hole Diameter": hole_diameter,
+                "Top of Plug": plug_top,
+                "Plug Length": plug_length,
+                "Squeeze Interval": squeeze_interval,
+                "Squeeze Efficiency": squeeze_efficiency,
+                "Mud Weight": mud_weight,
+            }
             calculate = calculated_button(
-                "Calculate Abandonment Design", "abandonment_results", "calculate_abandonment"
+                "Calculate Abandonment Design",
+                "abandonment_results",
+                "calculate_abandonment",
+                inputs=inputs,
             )
 
     with info_col:
@@ -105,16 +120,18 @@ def show():
 
     plug_bottom = plug_top + plug_length
 
-    if calculate:
-        begin_calculation("Calculating Abandonment Design…")
+    if calculate or results_current("abandonment_results", inputs):
+        if calculate:
+            begin_calculation("Calculating Abandonment Design…")
+
+            yield_per_sack = cement["Yield_m3_per_sack"]
+
+            valid, message = validate_inputs(hole_diameter, plug_length, yield_per_sack)
+            if not valid:
+                st.error(message)
+                return
 
         yield_per_sack = cement["Yield_m3_per_sack"]
-
-        valid, message = validate_inputs(hole_diameter, plug_length, yield_per_sack)
-        if not valid:
-            st.error(message)
-            return
-
         # abandonment plug
         plug_volume = calculate_plug_volume(hole_diameter, plug_length)
         plug_sacks = calculate_abandonment_sacks(plug_volume, yield_per_sack)
@@ -134,18 +151,19 @@ def show():
         total_volume = plug_volume + squeeze_volume
         total_sacks = plug_sacks + squeeze_sacks
 
-        st.session_state["abandonment_results"] = {
-            "Cement Class": cement_class,
-            "Plug Volume": plug_volume,
-            "Plug Cement (sacks)": plug_sacks,
-            "Squeeze Volume": squeeze_volume,
-            "Squeeze Cement (sacks)": squeeze_sacks,
-            "Total Volume": total_volume,
-            "Total Cement (sacks)": total_sacks,
-            "Top of Plug": plug_top,
-            "Bottom of Plug": plug_bottom,
-            "Balanced Plug Pressure (MPa)": balanced_pressure / 1_000_000,
-        }
+        if calculate:
+            save_calculation("abandonment_results", {
+                "Cement Class": cement_class,
+                "Plug Volume": plug_volume,
+                "Plug Cement (sacks)": plug_sacks,
+                "Squeeze Volume": squeeze_volume,
+                "Squeeze Cement (sacks)": squeeze_sacks,
+                "Total Volume": total_volume,
+                "Total Cement (sacks)": total_sacks,
+                "Top of Plug": plug_top,
+                "Bottom of Plug": plug_bottom,
+                "Balanced Plug Pressure (MPa)": balanced_pressure / 1_000_000,
+            }, inputs)
 
         st.divider()
         section_title("Results", "Abandonment Design Summary")
@@ -207,3 +225,5 @@ def show():
             )
 
         st.success("Abandonment design completed successfully.")
+
+        clear_results_button("abandonment_results")

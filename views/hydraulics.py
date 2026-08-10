@@ -17,6 +17,9 @@ from views.ui_style import (
     apply_plotly_style,
     begin_calculation,
     calculated_button,
+    save_calculation,
+    results_current,
+    clear_results_button,
 )
 
 
@@ -31,7 +34,7 @@ def show():
     input_col, info_col = st.columns([1.2, 1], gap="large")
 
     with input_col:
-        with st.container(border=True):
+        with st.container(border=True, key="module-first-card"):
             section_title("Inputs", "Flow Parameters")
 
             flow_rate = st.number_input("Pump Rate (L/min)", min_value=0.0, value=1200.0)
@@ -42,8 +45,20 @@ def show():
             pv = st.number_input("Plastic Viscosity (cP)", min_value=0.0, value=20.0)
             yp = st.number_input("Yield Point (lb/100ft²)", min_value=0.0, value=15.0)
 
+            inputs = {
+                "Pump Rate": flow_rate,
+                "Hole Diameter": hole_diameter,
+                "Pipe OD": pipe_od,
+                "TVD": tvd,
+                "Mud Density": mud_density,
+                "PV": pv,
+                "YP": yp,
+            }
             calculate = calculated_button(
-                "Calculate Hydraulics", "hydraulics_results", "calculate_hydraulics"
+                "Calculate Hydraulics",
+                "hydraulics_results",
+                "calculate_hydraulics",
+                inputs=inputs,
             )
 
     with info_col:
@@ -63,14 +78,15 @@ def show():
                 """
             )
 
-    if calculate:
-        begin_calculation("Calculating Hydraulics…")
+    if calculate or results_current("hydraulics_results", inputs):
+        if calculate:
+            begin_calculation("Calculating Hydraulics…")
 
-        valid, message = validate_inputs(flow_rate, hole_diameter, pipe_od, tvd)
+            valid, message = validate_inputs(flow_rate, hole_diameter, pipe_od, tvd)
 
-        if not valid:
-            st.error(message)
-            return
+            if not valid:
+                st.error(message)
+                return
 
         velocity = calculate_annular_velocity(flow_rate, hole_diameter, pipe_od)
         cleaning = evaluate_hole_cleaning(velocity)
@@ -81,12 +97,13 @@ def show():
         )
         ecd = calculate_ecd(mud_density, tvd, pressure_drop)
 
-        st.session_state["hydraulics_results"] = {
-            "Annular Velocity": velocity,
-            "Hole Cleaning": cleaning,
-            "Pressure Drop": pressure_drop / 1_000_000,  # convert to MPa
-            "ECD": ecd,
-        }
+        if calculate:
+            save_calculation("hydraulics_results", {
+                "Annular Velocity": velocity,
+                "Hole Cleaning": cleaning,
+                "Pressure Drop": pressure_drop / 1_000_000,  # convert to MPa
+                "ECD": ecd,
+            }, inputs)
 
         st.divider()
         section_title("Analysis", "Hydraulics Profile")
@@ -155,3 +172,5 @@ def show():
                     f"{ecd:.2f} kg/m³",
                 ],
             )
+
+        clear_results_button("hydraulics_results")

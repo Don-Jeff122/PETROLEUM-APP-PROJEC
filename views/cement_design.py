@@ -24,6 +24,9 @@ from views.ui_style import (
     results_table,
     begin_calculation,
     calculated_button,
+    save_calculation,
+    results_current,
+    clear_results_button,
 )
 
 
@@ -38,7 +41,7 @@ def show():
     database = load_cement_database()
     additives_db = load_additives_database()
 
-    with st.container(border=True):
+    with st.container(border=True, key="module-first-card"):
         section_title("Step 1", "Select Cement Class")
         cement_class = st.selectbox(
             "Cement Class",
@@ -109,10 +112,6 @@ def show():
                 value=300.0,
             )
 
-            calculate = calculated_button(
-                "Calculate Cement Design", "cement_results", "calculate_cement"
-            )
-
         with st.container(border=True):
             section_title("Step 3", "Cement Additives")
             selected_additives = st.multiselect(
@@ -120,6 +119,25 @@ def show():
                 additives_db["Additive_Name"].tolist(),
                 help="Additives are applied per sack of cement.",
             )
+
+        inputs = {
+            "Cement Class": cement_class,
+            "Hole Diameter": hole_diameter,
+            "Casing OD": casing_od,
+            "Interval Length": interval_length,
+            "Excess (%)": excess_percent,
+            "Bottom-Hole Temp": bottom_hole_temp,
+            "Spacer Length": spacer_length,
+            "Flush Length": flush_length,
+            "Pump Rate": pump_rate,
+            "Additives": selected_additives,
+        }
+        calculate = calculated_button(
+            "Calculate Cement Design",
+            "cement_results",
+            "calculate_cement",
+            inputs=inputs,
+        )
 
     with info_col:
         with st.container(border=True):
@@ -138,23 +156,25 @@ def show():
                 """
             )
 
-    if calculate:
-        begin_calculation("Calculating Cement Design…")
+    if calculate or results_current("cement_results", inputs):
+        if calculate:
+            begin_calculation("Calculating Cement Design…")
+
+            yield_per_sack = cement["Yield_m3_per_sack"]
+
+            valid, message = validate_inputs(
+                hole_diameter,
+                casing_od,
+                interval_length,
+                excess_percent,
+                yield_per_sack,
+            )
+
+            if not valid:
+                st.error(message)
+                return
 
         yield_per_sack = cement["Yield_m3_per_sack"]
-
-        valid, message = validate_inputs(
-            hole_diameter,
-            casing_od,
-            interval_length,
-            excess_percent,
-            yield_per_sack,
-        )
-
-        if not valid:
-            st.error(message)
-            return
-
         volume = calculate_annular_volume(
             hole_diameter,
             casing_od,
@@ -202,24 +222,25 @@ def show():
                 }
             )
 
-        st.session_state["cement_results"] = {
-            "Cement Class": cement_class,
-            "Density (ppg)": cement["Density_ppg"],
-            "Yield (m³/sack)": yield_per_sack,
-            "Max Temp (°C)": cement["Max_Temperature_C"],
-            "Bottom-Hole Temp (°C)": bottom_hole_temp,
-            "Temperature Rating": temp_rating,
-            "Slurry Volume": volume,
-            "Required Cement": sacks,
-            "Lead Volume": lead_volume,
-            "Tail Volume": tail_volume,
-            "Spacer Volume": spacer_volume,
-            "Flush Volume": flush_volume,
-            "Pump Time": pump_time,
-            "Bumping Pressure (Pa)": bump_pressure,
-            "Excess (%)": excess_percent,
-            "Additives": additive_rows,
-        }
+        if calculate:
+            save_calculation("cement_results", {
+                "Cement Class": cement_class,
+                "Density (ppg)": cement["Density_ppg"],
+                "Yield (m³/sack)": yield_per_sack,
+                "Max Temp (°C)": cement["Max_Temperature_C"],
+                "Bottom-Hole Temp (°C)": bottom_hole_temp,
+                "Temperature Rating": temp_rating,
+                "Slurry Volume": volume,
+                "Required Cement": sacks,
+                "Lead Volume": lead_volume,
+                "Tail Volume": tail_volume,
+                "Spacer Volume": spacer_volume,
+                "Flush Volume": flush_volume,
+                "Pump Time": pump_time,
+                "Bumping Pressure (Pa)": bump_pressure,
+                "Excess (%)": excess_percent,
+                "Additives": additive_rows,
+            }, inputs)
 
         st.divider()
         section_title("Results", "Cement Job Summary")
@@ -327,3 +348,5 @@ def show():
             )
 
         st.success("Cement design completed successfully.")
+
+        clear_results_button("cement_results")

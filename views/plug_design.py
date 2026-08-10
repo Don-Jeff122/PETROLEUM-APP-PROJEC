@@ -11,6 +11,9 @@ from views.ui_style import (
     results_table,
     begin_calculation,
     calculated_button,
+    save_calculation,
+    results_current,
+    clear_results_button,
 )
 
 
@@ -24,7 +27,7 @@ def show():
 
     database = load_cement_database()
 
-    with st.container(border=True):
+    with st.container(border=True, key="module-first-card"):
         section_title("Step 1", "Select Cement Class")
         cement_class = st.selectbox(
             "Cement Class",
@@ -56,8 +59,17 @@ def show():
             plug_length = st.number_input("Plug Length (m)", value=100.0)
             plug_top = st.number_input("Top of Plug (m)", value=1500.0)
 
+            inputs = {
+                "Cement Class": cement_class,
+                "Hole Diameter": hole_diameter,
+                "Plug Length": plug_length,
+                "Top of Plug": plug_top,
+            }
             calculate = calculated_button(
-                "Calculate Plug", "plug_results", "calculate_plug"
+                "Calculate Plug",
+                "plug_results",
+                "calculate_plug",
+                inputs=inputs,
             )
 
     plug_bottom = plug_top + plug_length
@@ -69,30 +81,33 @@ def show():
             st.metric("Bottom of Plug", f"{plug_bottom:.0f} m")
             st.metric("Plug Length", f"{plug_length:.0f} m")
 
-    if calculate:
-        begin_calculation("Calculating Plug…")
+    if calculate or results_current("plug_results", inputs):
+        if calculate:
+            begin_calculation("Calculating Plug…")
+
+            yield_per_sack = cement["Yield_m3_per_sack"]
+
+            valid, message = validate_inputs(
+                hole_diameter,
+                plug_length,
+                yield_per_sack,
+            )
+
+            if not valid:
+                st.error(message)
+                return
 
         yield_per_sack = cement["Yield_m3_per_sack"]
-
-        valid, message = validate_inputs(
-            hole_diameter,
-            plug_length,
-            yield_per_sack,
-        )
-
-        if not valid:
-            st.error(message)
-            return
-
         volume = calculate_plug_volume(hole_diameter, plug_length)
         sacks = volume / yield_per_sack  # required cement sacks
 
-        st.session_state["plug_results"] = {
-            "Plug Volume": volume,
-            "Required Cement": sacks,
-            "Top of Plug": plug_top,
-            "Bottom of Plug": plug_bottom,
-        }
+        if calculate:
+            save_calculation("plug_results", {
+                "Plug Volume": volume,
+                "Required Cement": sacks,
+                "Top of Plug": plug_top,
+                "Bottom of Plug": plug_bottom,
+            }, inputs)
 
         st.divider()
         section_title("Results", "Plug Design Summary")
@@ -130,3 +145,5 @@ def show():
             )
 
         st.success("Plug design completed successfully.")
+
+        clear_results_button("plug_results")

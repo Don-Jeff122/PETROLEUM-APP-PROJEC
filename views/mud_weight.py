@@ -18,6 +18,9 @@ from views.ui_style import (
     apply_plotly_style,
     begin_calculation,
     calculated_button,
+    save_calculation,
+    results_current,
+    clear_results_button,
 )
 
 # simple unit conversion
@@ -35,7 +38,7 @@ def show():
     input_col, info_col = st.columns([1.2, 1], gap="large")
 
     with input_col:
-        with st.container(border=True):
+        with st.container(border=True, key="module-first-card"):
             section_title("Inputs", "Well Parameters")
 
             pressure_unit = st.selectbox(
@@ -69,8 +72,17 @@ def show():
                 value=2500.0,
             )
 
+            inputs = {
+                "Pressure Unit": pressure_unit,
+                "Pore Pressure": pore_pressure,
+                "Fracture Pressure": fracture_pressure,
+                "TVD": tvd,
+            }
             calculate = calculated_button(
-                "Calculate Mud Weight", "mud_results", "calculate_mud_weight"
+                "Calculate Mud Weight",
+                "mud_results",
+                "calculate_mud_weight",
+                inputs=inputs,
             )
 
     with info_col:
@@ -90,18 +102,19 @@ def show():
                 """
             )
 
-    if calculate:
-        begin_calculation("Calculating Mud Weight…")
+    if calculate or results_current("mud_results", inputs):
+        if calculate:
+            begin_calculation("Calculating Mud Weight…")
 
-        valid, message = validate_inputs(
-            pore_pressure,
-            fracture_pressure,
-            tvd,
-        )
+            valid, message = validate_inputs(
+                pore_pressure,
+                fracture_pressure,
+                tvd,
+            )
 
-        if not valid:
-            st.error(message)
-            return
+            if not valid:
+                st.error(message)
+                return
 
         mud_density = calculate_mud_density(pore_pressure, tvd)
         hydrostatic_pressure = calculate_hydrostatic_pressure(mud_density, tvd)
@@ -110,13 +123,14 @@ def show():
         )
         status = check_safe_density(mud_density, minimum_density, maximum_density)
 
-        st.session_state["mud_results"] = {
-            "Mud Density": mud_density,
-            "Hydrostatic Pressure": pa_to_mpa(hydrostatic_pressure),
-            "Minimum Safe Density": minimum_density,
-            "Maximum Safe Density": maximum_density,
-            "Status": status,
-        }
+        if calculate:
+            save_calculation("mud_results", {
+                "Mud Density": mud_density,
+                "Hydrostatic Pressure": pa_to_mpa(hydrostatic_pressure),
+                "Minimum Safe Density": minimum_density,
+                "Maximum Safe Density": maximum_density,
+                "Status": status,
+            }, inputs)
 
         st.divider()
         section_title("Analysis", "Pressure Profile")
@@ -180,3 +194,5 @@ def show():
                     status,
                 ],
             )
+
+        clear_results_button("mud_results")
