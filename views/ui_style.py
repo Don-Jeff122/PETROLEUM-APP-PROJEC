@@ -3,6 +3,24 @@ from pathlib import Path
 import pandas as pd
 import streamlit as st
 
+# Material Symbols (Outlined) glyph paths, inlined as SVG so icons render
+# without depending on a webfont or on static file serving (works on
+# Streamlit Cloud). Keys are the snake_case Material Symbols names.
+_ICON_PATHS = {
+    "menu": "M120-240v-80h720v80H120Zm0-200v-80h720v80H120Zm0-200v-80h720v80H120Z",
+    "home": "M240-200h120v-240h240v240h120v-360L480-740 240-560v360Zm-80 80v-480l320-240 320 240v480H520v-240h-80v240H160Zm320-350Z",
+    "info": "M440-280h80v-240h-80v240Zm40-320q17 0 28.5-11.5T520-640q0-17-11.5-28.5T480-680q-17 0-28.5 11.5T440-640q0 17 11.5 28.5T480-600Zm0 520q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Zm0-80q134 0 227-93t93-227q0-134-93-227t-227-93q-134 0-227 93t-93 227q0 134 93 227t227 93Z",
+    "oil_barrel": "M160-120q-17 0-28.5-11.5T120-160q0-17 11.5-28.5T160-200h40v-240h-40q-17 0-28.5-11.5T120-480q0-17 11.5-28.5T160-520h40v-240h-40q-17 0-28.5-11.5T120-800q0-17 11.5-28.5T160-840h640q17 0 28.5 11.5T840-800q0 17-11.5 28.5T800-760h-40v240h40q17 0 28.5 11.5T840-480q0 17-11.5 28.5T800-440h-40v240h40q17 0 28.5 11.5T840-160q0 17-11.5 28.5T800-120H160Zm120-80h400v-240q-17 0-28.5-11.5T640-480q0-17 11.5-28.5T680-520v-240H280v240q17 0 28.5 11.5T320-480q0 17-11.5 28.5T280-440v240Zm285-154.5q35-34.5 35-83.5 0-39-22.5-67T480-620q-75 86-97.5 114.5T360-438q0 49 35 83.5t85 34.5q50 0 85-34.5ZM280-200v-560 560Z",
+    "science": "M200-120q-51 0-72.5-45.5T138-250l222-270v-240h-40q-17 0-28.5-11.5T280-800q0-17 11.5-28.5T320-840h320q17 0 28.5 11.5T680-800q0 17-11.5 28.5T640-760h-40v240l222 270q32 39 10.5 84.5T760-120H200Zm0-80h560L520-492v-268h-80v268L200-200Zm280-280Z",
+    "waves": "M80-146v-78q29 0 49.5-9t41.5-19.5q21-10.5 46.5-19t63-8.5q37.5 0 62 8.5t45.5 19q21 10.5 42 19.5t50 9q29 0 50-9t42-19.5q21-10.5 46-19t62.5-8.5q37.5 0 62.5 8.5t46 19q21 10.5 42 19.5t49 9v78q-38 0-63.5-9T770-174.5q-21-10.5-41-19t-49-8.5q-28 0-48.5 8.5t-41 19Q570-164 544.5-155t-64.5 9q-39 0-64.5-9t-46-19.5Q349-185 329-193.5t-48.5-8.5q-28.5 0-49 8.5t-41.5 19Q169-164 143.5-155T80-146Zm0-178v-78q29 0 49.5-9t41.5-19.5q21-10.5 46.5-19t63-8.5q37.5 0 62 8.5t45.5 19q21 10.5 42 19.5t50 9q29 0 50-9t42-19.5q21-10.5 46-19t62-8.5q38 0 63 8.5t46 19q21 10.5 42 19.5t49 9v78q-38 0-63.5-9T770-352.5q-21-10.5-41-19t-49-8.5q-29 0-49.5 8.5t-41 19Q569-342 544-333t-64 9q-39 0-64.5-9t-46-19.5Q349-363 329-371.5t-48.5-8.5q-28.5 0-49 8.5t-41.5 19Q169-342 143.5-333T80-324Zm0-178v-78q29 0 49.5-9t41.5-19.5q21-10.5 46.5-19t63-8.5q37.5 0 62 8.5t45.5 19q21 10.5 42 19.5t50 9q29 0 50-9t42-19.5q21-10.5 46-19t62-8.5q38 0 63 8.5t46 19q21 10.5 42 19.5t49 9v78q-38 0-63.5-9T770-530.5q-21-10.5-41-19t-49-8.5q-28 0-48.5 8.5t-41 19Q570-520 544.5-511t-64.5 9q-39 0-64.5-9t-46-19.5Q349-541 329-549.5t-48.5-8.5q-28.5 0-49 8.5t-41.5 19Q169-520 143.5-511T80-502Zm0-178v-78q29 0 49.5-9t41.5-19.5q21-10.5 46.5-19t63-8.5q37.5 0 62 8.5t45.5 19q21 10.5 42 19.5t50 9q29 0 50-9t42-19.5q21-10.5 46-19t62-8.5q38 0 63 8.5t46 19q21 10.5 42 19.5t49 9v78q-38 0-63.5-9T770-708.5q-21-10.5-41-19t-49-8.5q-28 0-48.5 8.5t-41 19Q570-698 544.5-689t-64.5 9q-39 0-64.5-9t-46-19.5Q349-719 329-727.5t-48.5-8.5q-28.5 0-49 8.5t-41.5 19Q169-698 143.5-689T80-680Z",
+    "construction": "M756-120 537-339l84-84 219 219-84 84Zm-552 0-84-84 276-276-68-68-28 28-51-51v82l-28 28-121-121 28-28h82l-50-50 142-142q20-20 43-29t47-9q24 0 47 9t43 29l-92 92 50 50-28 28 68 68 90-90q-4-11-6.5-23t-2.5-24q0-59 40.5-99.5T701-841q15 0 28.5 3t27.5 9l-99 99 72 72 99-99q7 14 9.5 27.5T841-701q0 59-40.5 99.5T701-561q-12 0-24-2t-23-7L204-120Z",
+    "block": "M324-111.5Q251-143 197-197t-85.5-127Q80-397 80-480t31.5-156Q143-709 197-763t127-85.5Q397-880 480-880t156 31.5Q709-817 763-763t85.5 127Q880-563 880-480t-31.5 156Q817-251 763-197t-127 85.5Q563-80 480-80t-156-31.5ZM480-160q54 0 104-17.5t92-50.5L228-676q-33 42-50.5 92T160-480q0 134 93 227t227 93Zm252-124q33-42 50.5-92T800-480q0-134-93-227t-227-93q-54 0-104 17.5T284-732l448 448ZM480-480Z",
+    "recycling": "m368-592 89-147-59-98q-12-20-34.5-20T329-837l-98 163 137 82Zm387 272-89-148 139-80 64 107q11 17 12 38t-9 39q-10 20-29.5 32T800-320h-45ZM640-40 480-200l160-160v80h190l-58 116q-11 20-30 32t-42 12h-60v80Zm-387-80q-20 0-36.5-10.5T192-158q-8-16-7.5-33.5T194-224l34-56h172v160H253Zm-99-114L89-364q-9-18-8.5-38.5T92-441l16-27-68-41 219-55 55 220-69-42-91 152Zm540-342-219-55 69-41-125-208h141q21 0 39.5 10.5T629-841l52 87 68-42-55 220Z",
+    "monitoring": "M120-120v-80l80-80v160h-80Zm160 0v-240l80-80v320h-80Zm160 0v-320l80 81v239h-80Zm160 0v-239l80-80v319h-80Zm160 0v-400l80-80v480h-80ZM120-327v-113l280-280 160 160 280-280v113L560-447 400-607 120-327Z",
+    "check_circle": "m424-296 282-282-56-56-226 226-114-114-56 56 170 170Zm56 216q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Zm0-80q134 0 227-93t93-227q0-134-93-227t-227-93q-134 0-227 93t-93 227q0 134 93 227t227 93Zm0-320Z",
+    "radio_button_unchecked": "M480-80q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Zm0-80q134 0 227-93t93-227q0-134-93-227t-227-93q-134 0-227 93t-93 227q0 134 93 227t227 93Z",
+}
+
 
 def inject_global_css():
     st.markdown(
@@ -39,16 +57,6 @@ def inject_global_css():
             src: url('/app/static/Inter-700.woff2') format('woff2');
         }
 
-        /* Material Symbols icon font — served locally so icons (ligatures)
-           render as glyphs instead of literal words. */
-        @font-face {
-            font-family: "Material Symbols Outlined";
-            font-style: normal;
-            font-weight: 100 700;
-            font-display: block;
-            src: url('/app/static/MaterialSymbolsOutlined.woff2') format('woff2');
-        }
-
         html, body, [class*="css"] {
             font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
         }
@@ -81,23 +89,24 @@ def inject_global_css():
             background: #071525;
         }
 
-        /* sidebar expand toggle -> hamburger (three bars) */
+        /* sidebar expand toggle -> hamburger (three bars), inlined SVG */
         [data-testid="stExpandSidebarButton"] svg,
         [data-testid="stExpandSidebarButton"] span {
             display: none !important;
         }
         [data-testid="stExpandSidebarButton"]::before {
-            content: "menu";
-            font-family: 'Material Symbols Outlined';
-            font-size: 24px;
-            font-feature-settings: 'liga';
-            line-height: 1;
+            content: "";
+            width: 24px;
+            height: 24px;
             display: inline-block;
-            color: #475569;
-            transition: color 0.2s ease, transform 0.15s ease;
+            background-image: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%20-960%20960%20960'%20width='24'%20height='24'%3E%3Cpath%20fill='%23475569'%20d='M120-240v-80h720v80H120Zm0-200v-80h720v80H120Zm0-200v-80h720v80H120Z'/%3E%3C/svg%3E");
+            background-size: 24px 24px;
+            background-repeat: no-repeat;
+            background-position: center;
+            transition: opacity 0.2s ease, transform 0.15s ease;
         }
         [data-testid="stExpandSidebarButton"]:hover::before {
-            color: #0A2540;
+            opacity: 0.75;
         }
         [data-testid="stExpandSidebarButton"]:active::before {
             transform: scale(0.9);
@@ -759,11 +768,20 @@ def inject_global_css():
 
 
 def icon(name: str, cls: str = ""):
-    """Return Material Symbols icon markup (font-based, no emoji).
+    """Return Material Symbols icon markup as inline SVG.
 
-    ``name`` is the snake_case icon name, e.g. ``"oil_barrel"``.
+    ``name`` is the snake_case icon name, e.g. ``"oil_barrel"``. SVGs are
+    self-contained (no webfont or static file needed) so icons always render.
+    Falls back to the font-based span for unknown names.
     """
-    return f'<span class="material-symbols-outlined {cls}">{name}</span>'
+    path = _ICON_PATHS.get(name)
+    if path is None:
+        return f'<span class="material-symbols-outlined {cls}">{name}</span>'
+    return (
+        f'<svg class="material-symbols-outlined {cls}" viewBox="0 -960 960 960" '
+        f'width="1em" height="1em" fill="currentColor" aria-hidden="true" '
+        f'focusable="false"><path d="{path}"/></svg>'
+    )
 
 
 def page_header(icon_name: str, title: str, subtitle: str):
@@ -986,8 +1004,9 @@ def render_top_bar():
         logo_html = (
             '<div class="top-bar-logo" style="width:40px;height:40px;display:flex;align-items:center;'
             'justify-content:center;background:#1565A8;border-radius:8px;">'
-            '<span class="material-symbols-outlined" style="font-size:22px;color:#fff;">oil_barrel</span>'
-            "</div>"
+            '<span style="color:#fff;font-size:22px;display:flex;">'
+            + icon("oil_barrel")
+            + "</span></div>"
         )
 
     st.markdown(
@@ -995,7 +1014,7 @@ def render_top_bar():
         <div class="top-bar">
             <button class="top-bar-btn" id="top-bar-menu"
                     title="Toggle navigation sidebar" aria-label="Toggle sidebar">
-                <span class="material-symbols-outlined">menu</span>
+                {icon("menu")}
             </button>
             <div class="top-bar-brand">
                 {logo_html}
@@ -1007,7 +1026,7 @@ def render_top_bar():
             <div class="top-bar-actions">
                 <button class="top-bar-btn" id="top-bar-home"
                         title="Go to Home" aria-label="Home">
-                    <span class="material-symbols-outlined">home</span>
+                    {icon("home")}
                 </button>
             </div>
         </div>

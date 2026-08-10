@@ -1,7 +1,7 @@
 import streamlit as st
 
 from modules.constants import APP_NAME, APP_VERSION, AUTHOR, UNIVERSITY, DEPARTMENT
-from views.ui_style import page_header, section_title
+from views.ui_style import page_header, section_title, icon
 
 
 def show():
@@ -45,30 +45,30 @@ def show():
         with st.container(border=True):
             section_title("Modules", "Available Tools")
             st.markdown(
-                """
+                f"""
                 <div class="module-list">
                     <div class="module-item">
-                        <div class="mi-icon"><span class="material-symbols-outlined">oil_barrel</span></div>
+                        <div class="mi-icon">{icon("oil_barrel")}</div>
                         <div class="mi-name">Mud Weight Design</div>
                     </div>
                     <div class="module-item">
-                        <div class="mi-icon"><span class="material-symbols-outlined">science</span></div>
+                        <div class="mi-icon">{icon("science")}</div>
                         <div class="mi-name">Rheology Analysis</div>
                     </div>
                     <div class="module-item">
-                        <div class="mi-icon"><span class="material-symbols-outlined">waves</span></div>
+                        <div class="mi-icon">{icon("waves")}</div>
                         <div class="mi-name">Hydraulics</div>
                     </div>
                     <div class="module-item">
-                        <div class="mi-icon"><span class="material-symbols-outlined">construction</span></div>
+                        <div class="mi-icon">{icon("construction")}</div>
                         <div class="mi-name">Cement Design</div>
                     </div>
                     <div class="module-item">
-                        <div class="mi-icon"><span class="material-symbols-outlined">block</span></div>
+                        <div class="mi-icon">{icon("block")}</div>
                         <div class="mi-name">Plug Design</div>
                     </div>
                     <div class="module-item">
-                        <div class="mi-icon"><span class="material-symbols-outlined">monitoring</span></div>
+                        <div class="mi-icon">{icon("monitoring")}</div>
                         <div class="mi-name">Results Dashboard</div>
                     </div>
                 </div>

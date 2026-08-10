@@ -18,6 +18,7 @@ from views.ui_style import (
     close_sidebar,
     bind_feature_cards,
     render_top_bar,
+    icon,
 )
 
 # Serve .woff2 fonts with the correct content type (Windows mimetypes lacks it)
@@ -76,7 +77,7 @@ if page == "Home":
     st.markdown(
         f"""
         <div class="home-hero">
-            <h1><span class="material-symbols-outlined">oil_barrel</span> {APP_NAME}</h1>
+            <h1>{icon("oil_barrel")} {APP_NAME}</h1>
             <p class="hero-sub">
                 Integrated drilling fluid and cementing engineering platform
                 for mud weight design, rheology, hydraulics, and cement job planning.
@@ -116,53 +117,53 @@ if page == "Home":
     )
 
     st.markdown(
-        """
+        f"""
         <div class="feature-grid">
             <div class="feature-card" data-page="Mud Weight">
                 <div class="feature-head">
-                    <div class="feature-icon"><span class="material-symbols-outlined">oil_barrel</span></div>
+                    <div class="feature-icon">{icon("oil_barrel")}</div>
                     <h3>Mud Weight Design</h3>
                 </div>
                 <p>Balance pore and fracture pressures with safe mud density windows.</p>
             </div>
             <div class="feature-card" data-page="Rheology">
                 <div class="feature-head">
-                    <div class="feature-icon"><span class="material-symbols-outlined">science</span></div>
+                    <div class="feature-icon">{icon("science")}</div>
                     <h3>Rheology Analysis</h3>
                 </div>
                 <p>Bingham plastic model from viscometer readings with flow curves.</p>
             </div>
             <div class="feature-card" data-page="Hydraulics">
                 <div class="feature-head">
-                    <div class="feature-icon"><span class="material-symbols-outlined">waves</span></div>
+                    <div class="feature-icon">{icon("waves")}</div>
                     <h3>Hydraulics</h3>
                 </div>
                 <p>Annular velocity, pressure drops, ECD and hole cleaning evaluation.</p>
             </div>
             <div class="feature-card" data-page="Cement Design">
                 <div class="feature-head">
-                    <div class="feature-icon"><span class="material-symbols-outlined">construction</span></div>
+                    <div class="feature-icon">{icon("construction")}</div>
                     <h3>Cement Design</h3>
                 </div>
                 <p>Primary cement job sizing with API database, additives and temperature checks.</p>
             </div>
             <div class="feature-card" data-page="Plug Design">
                 <div class="feature-head">
-                    <div class="feature-icon"><span class="material-symbols-outlined">block</span></div>
+                    <div class="feature-icon">{icon("block")}</div>
                     <h3>Plug Design</h3>
                 </div>
                 <p>Cement plug volume and sack requirements with depth tracking.</p>
             </div>
             <div class="feature-card" data-page="Abandonment">
                 <div class="feature-head">
-                    <div class="feature-icon"><span class="material-symbols-outlined">recycling</span></div>
+                    <div class="feature-icon">{icon("recycling")}</div>
                     <h3>Plug &amp; Abandonment</h3>
                 </div>
                 <p>Abandonment plugs, squeeze cement volumes and balanced plug design.</p>
             </div>
             <div class="feature-card" data-page="Results">
                 <div class="feature-head">
-                    <div class="feature-icon"><span class="material-symbols-outlined">monitoring</span></div>
+                    <div class="feature-icon">{icon("monitoring")}</div>
                     <h3>Results Dashboard</h3>
                 </div>
                 <p>Consolidated summary, PDF report export and cementing job procedure sheets.</p>
