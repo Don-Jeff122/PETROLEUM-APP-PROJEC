@@ -24,7 +24,7 @@ def show():
                 hydraulics calculations, cementing design, plug design, and
                 plug &amp; abandonment operations.
 
-                This was developed as a final year project using
+                This was developed as end of semester project using
                 **Python** and **Streamlit**.
                 """
             )
